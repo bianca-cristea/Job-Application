@@ -1,6 +1,7 @@
 package com.cristeabianca.job_application.company;
-
 import com.cristeabianca.job_application.job.Job;
+import com.cristeabianca.job_application.review.Review;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -14,8 +15,12 @@ public class Company {
     private String name;
     private String description;
 
+    @JsonIgnore   //pentru a evita "Infinite recursion";se foloseste la relatii bidirectionale
     @OneToMany(mappedBy = "company")
     private List<Job> jobs;
+
+    @OneToMany(mappedBy = "company")
+    private List<Review> reviews;
 
     public Company() {
     }
@@ -33,6 +38,14 @@ public class Company {
 
     public void setJobs(List<Job> jobs) {
         this.jobs = jobs;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 
     public Long getId() {
