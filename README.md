@@ -42,6 +42,17 @@ PUT /companies/{companyId}/reviews/{reviewId}
 
 DELETE /companies/{companyId}/reviews/{reviewId}
 
+### Endpoints for role
+GET /roles -> get all roles
+
+PUT /roles/{id} -> update company by id
+
+POST /roles -> create company
+
+DELETE /roles/{id} -> delete a company
+
+GET /roles/{id} -> get a company by id
+
 ## Author
 Cristea Bianca-Stefania
 
