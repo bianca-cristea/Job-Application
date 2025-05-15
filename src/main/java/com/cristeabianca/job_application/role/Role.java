@@ -1,7 +1,7 @@
 package com.cristeabianca.job_application.role;
 
+import com.cristeabianca.job_application.user.User;
 import jakarta.persistence.*;
-import org.apache.catalina.User;
 
 import java.util.Set;
 

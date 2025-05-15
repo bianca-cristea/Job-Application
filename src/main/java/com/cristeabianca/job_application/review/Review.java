@@ -1,6 +1,7 @@
 package com.cristeabianca.job_application.review;
 
 import com.cristeabianca.job_application.company.Company;
+import com.cristeabianca.job_application.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -13,9 +14,17 @@ public class Review {
     private String description;
     private double rating;
 
-    @JsonIgnore
+
     @ManyToOne
+    @JsonIgnore
     private Company company;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
+
 
     public Review() {
     }

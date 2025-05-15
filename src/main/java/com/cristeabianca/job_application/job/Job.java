@@ -1,7 +1,10 @@
 package com.cristeabianca.job_application.job;
 
+import com.cristeabianca.job_application.application.Application;
 import com.cristeabianca.job_application.company.Company;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 public class Job {
@@ -17,16 +20,21 @@ public class Job {
     @ManyToOne
     private Company company;
 
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
+    private List<Application> applications;
+
     public Job() {
     }
 
-    public Job(Long id, String title, String description, String minSalary, String maxSalary, String location) {
+    public Job(Long id, String title, String description, String minSalary, String maxSalary, String location, Company company, List<Application> applications) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.minSalary = minSalary;
         this.maxSalary = maxSalary;
         this.location = location;
+        this.company = company;
+        this.applications = applications;
     }
 
     public Company getCompany() {

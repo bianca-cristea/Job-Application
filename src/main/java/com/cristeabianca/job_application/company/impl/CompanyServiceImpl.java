@@ -3,8 +3,6 @@ package com.cristeabianca.job_application.company.impl;
 import com.cristeabianca.job_application.company.Company;
 import com.cristeabianca.job_application.company.CompanyRepository;
 import com.cristeabianca.job_application.company.CompanyService;
-import com.cristeabianca.job_application.job.JobRepository;
-import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
