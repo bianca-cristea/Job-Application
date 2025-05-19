@@ -4,6 +4,7 @@ import com.cristeabianca.job_application.review.Review;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,8 +20,9 @@ public class Company {
     @OneToMany(mappedBy = "company")
     private List<Job> jobs;
 
-    @OneToMany(mappedBy = "company")
-    private List<Review> reviews;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    private List<Review> reviews = new ArrayList<>();
+
 
     public Company() {
     }

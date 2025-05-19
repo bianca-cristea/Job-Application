@@ -15,7 +15,7 @@ public class Application {
 
     private String status;
 
-    @JsonIgnore
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

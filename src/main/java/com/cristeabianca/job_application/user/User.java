@@ -4,6 +4,7 @@ import com.cristeabianca.job_application.application.Application;
 import com.cristeabianca.job_application.review.Review;
 import com.cristeabianca.job_application.role.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -19,9 +20,10 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
+
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
@@ -32,7 +34,7 @@ public class User {
     )
     private Set<Role> roles;
 
-
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Application> applications;
 
