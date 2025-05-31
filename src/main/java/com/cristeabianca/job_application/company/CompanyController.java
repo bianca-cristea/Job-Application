@@ -24,7 +24,7 @@ public class CompanyController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable  Long id){
-     return new ResponseEntity<>(companyService.getCompanyById(id),HttpStatus.OK);
+        return new ResponseEntity<>(companyService.getCompanyById(id),HttpStatus.OK);
     }
 
     @PostMapping

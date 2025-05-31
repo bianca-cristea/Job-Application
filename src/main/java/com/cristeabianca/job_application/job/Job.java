@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(name = "job")
 public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

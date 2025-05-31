@@ -1,10 +1,22 @@
 package com.cristeabianca.job_application.user;
 
+import com.cristeabianca.job_application.jwt.JwtUtils;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -28,12 +40,7 @@ public class UserController {
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
-    public ResponseEntity<String> createUser(@RequestBody User user) {
-        boolean result = userService.createUser(user);
-        return result ? new ResponseEntity<>("User created", HttpStatus.CREATED)
-                : new ResponseEntity<>("Could not create user", HttpStatus.BAD_REQUEST);
-    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User user) {
@@ -41,6 +48,10 @@ public class UserController {
         return result ? new ResponseEntity<>("User updated", HttpStatus.OK)
                 : new ResponseEntity<>("Could not update user", HttpStatus.NOT_FOUND);
     }
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {

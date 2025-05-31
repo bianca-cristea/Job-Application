@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public class JobServiceImpl implements JobService {
 
-//  private List<Job> jobs = new ArrayList<>();
+    //  private List<Job> jobs = new ArrayList<>();
     JobRepository jobRepository;
 
     public JobServiceImpl(JobRepository jobRepository){
@@ -36,26 +36,26 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job getJobById(Long id) {
-         return jobRepository.findById(id).orElse(null);
+        return jobRepository.findById(id).orElse(null);
     }
 
     @Override
     public boolean deleteJobById(Long id) {
-         try{
-             jobRepository.deleteById(id);
-             return true;
-         }
-         catch (Exception e){
-             return false;
-         }
+        try{
+            jobRepository.deleteById(id);
+            return true;
+        }
+        catch (Exception e){
+            return false;
+        }
     }
 
     @Override
     public boolean updateJobById(Long id,Job updatedJob){
 //Optional e un wrapper folosit pentru a reprezenta o valoare care poate exista sau nu.
 //Daca nu e prezenta, returneaza Optional.empty(), mai bine decat null.
-         Optional<Job> jobOptional = jobRepository.findById(id);
-         if(jobOptional.isPresent()){
+        Optional<Job> jobOptional = jobRepository.findById(id);
+        if(jobOptional.isPresent()){
             Job job = jobOptional.get();
             job.setTitle(updatedJob.getTitle());
             job.setDescription(updatedJob.getDescription());
@@ -65,7 +65,7 @@ public class JobServiceImpl implements JobService {
             jobRepository.save(job);
 
             return true;
-         }
-         return false;
+        }
+        return false;
     }
 }
