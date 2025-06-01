@@ -10,7 +10,7 @@ public class JwtResponse {
         this.username = username;
     }
 
-    // Getters & Setters
+
     public String getToken() {
         return token;
     }

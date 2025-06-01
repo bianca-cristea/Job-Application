@@ -1,5 +1,6 @@
 package com.cristeabianca.job_application.company;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,7 +29,7 @@ public class CompanyController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createCompany(@RequestBody Company company){
+    public ResponseEntity<String> createCompany(@RequestBody @Valid Company company){
         if(companyService.createCompany(company)){
             return new ResponseEntity<>("Company created.",HttpStatus.CREATED);
         }else{

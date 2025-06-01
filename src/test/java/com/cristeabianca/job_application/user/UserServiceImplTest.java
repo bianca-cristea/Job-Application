@@ -1,11 +1,19 @@
 package com.cristeabianca.job_application.user;
 
-import com.cristeabianca.job_application.user.User;
-import com.cristeabianca.job_application.user.UserRepository;
 import com.cristeabianca.job_application.user.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
@@ -24,13 +32,17 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testGetAllUsers() {
+    void testGetAllUsersWithPagination() {
         List<User> users = List.of(new User(), new User());
-        when(userRepository.findAll()).thenReturn(users);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<User> userPage = new PageImpl<>(users, pageable, users.size());
 
-        List<User> result = userService.getAllUsers();
-        assertEquals(2, result.size());
-        verify(userRepository, times(1)).findAll();
+        when(userRepository.findAll(pageable)).thenReturn(userPage);
+
+        Page<User> result = userService.getAllUsers(pageable);
+
+        assertEquals(2, result.getContent().size());
+        verify(userRepository, times(1)).findAll(pageable);
     }
 
     @Test

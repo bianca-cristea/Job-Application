@@ -3,59 +3,67 @@ package com.cristeabianca.job_application.job.impl;
 import com.cristeabianca.job_application.job.Job;
 import com.cristeabianca.job_application.job.JobRepository;
 import com.cristeabianca.job_application.job.JobService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class JobServiceImpl implements JobService {
 
-    //  private List<Job> jobs = new ArrayList<>();
-    JobRepository jobRepository;
+    private static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
 
-    public JobServiceImpl(JobRepository jobRepository){
-        this.jobRepository=jobRepository;
+    private final JobRepository jobRepository;
+
+    public JobServiceImpl(JobRepository jobRepository) {
+        this.jobRepository = jobRepository;
     }
-
 
     @Override
     public List<Job> showAllJobs() {
+        logger.debug("Fetching all jobs");
         return jobRepository.findAll();
     }
 
     @Override
     public boolean createNewJob(Job job) {
+        logger.info("Creating new job with title: {}", job.getTitle());
         if (job != null) {
             jobRepository.save(job);
+            logger.info("Job '{}' created successfully", job.getTitle());
             return true;
-        } else return false;
-
-    }
-
-    @Override
-    public Job getJobById(Long id) {
-        return jobRepository.findById(id).orElse(null);
-    }
-
-    @Override
-    public boolean deleteJobById(Long id) {
-        try{
-            jobRepository.deleteById(id);
-            return true;
-        }
-        catch (Exception e){
+        } else {
+            logger.warn("Attempted to create null job");
             return false;
         }
     }
 
     @Override
-    public boolean updateJobById(Long id,Job updatedJob){
-//Optional e un wrapper folosit pentru a reprezenta o valoare care poate exista sau nu.
-//Daca nu e prezenta, returneaza Optional.empty(), mai bine decat null.
+    public Job getJobById(Long id) {
+        logger.debug("Fetching job by id: {}", id);
+        return jobRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean deleteJobById(Long id) {
+        logger.info("Deleting job with id: {}", id);
+        try {
+            jobRepository.deleteById(id);
+            logger.info("Job with id {} deleted successfully", id);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to delete job with id {}: {}", id, e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateJobById(Long id, Job updatedJob) {
+        logger.info("Updating job with id: {}", id);
         Optional<Job> jobOptional = jobRepository.findById(id);
-        if(jobOptional.isPresent()){
+        if (jobOptional.isPresent()) {
             Job job = jobOptional.get();
             job.setTitle(updatedJob.getTitle());
             job.setDescription(updatedJob.getDescription());
@@ -63,9 +71,11 @@ public class JobServiceImpl implements JobService {
             job.setMinSalary(updatedJob.getMinSalary());
             job.setMaxSalary(updatedJob.getMaxSalary());
             jobRepository.save(job);
-
+            logger.info("Job with id {} updated successfully", id);
             return true;
+        } else {
+            logger.warn("Job with id {} not found for update", id);
+            return false;
         }
-        return false;
     }
 }

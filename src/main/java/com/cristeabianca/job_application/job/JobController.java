@@ -1,6 +1,7 @@
 package com.cristeabianca.job_application.job;
 
 import com.cristeabianca.job_application.company.Company;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class JobController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createNewJob(@RequestBody Job job){
+    public ResponseEntity<String> createNewJob(@RequestBody @Valid Job job){
         boolean result = jobService.createNewJob(job);
         return result?new ResponseEntity<>("Job created.",HttpStatus.CREATED):new ResponseEntity<>("Job could not be created.",HttpStatus.NOT_FOUND);
     }

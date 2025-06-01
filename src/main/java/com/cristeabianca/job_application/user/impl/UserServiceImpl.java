@@ -3,87 +3,96 @@ package com.cristeabianca.job_application.user.impl;
 import com.cristeabianca.job_application.user.User;
 import com.cristeabianca.job_application.user.UserRepository;
 import com.cristeabianca.job_application.user.UserService;
+
+import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     private final UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private DataSource dataSource;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Page<User> getAllUsers(Pageable pageable) {
+        logger.debug("Fetching all users");
+        return userRepository.findAll(pageable);
     }
 
     @Override
     public User getUserById(Long id) {
+        logger.debug("Fetching user by id: {}", id);
         return userRepository.findById(id).orElse(null);
     }
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    DataSource dataSource;
-
     @Override
-    public boolean createUser(com.cristeabianca.job_application.user.User user) {
-
+    public boolean createUser(User user) {
+        logger.info("Creating user with username: {}", user.getUsername());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-
+        logger.debug("User {} created successfully", user.getUsername());
         return true;
     }
 
-
     @Override
     public boolean updateUser(Long id, User user) {
+        logger.info("Updating user with id: {}", id);
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             User existing = optionalUser.get();
             existing.setUsername(user.getUsername());
             if (!user.getPassword().isEmpty() && !passwordEncoder.matches(user.getPassword(), existing.getPassword())) {
                 existing.setPassword(passwordEncoder.encode(user.getPassword()));
+                logger.debug("Password updated for user id: {}", id);
             }
             existing.setRoles(user.getRoles());
             userRepository.save(existing);
+            logger.info("User with id {} updated successfully", id);
             return true;
-        }
-        return false;
-    }
-
-
-    @Override
-    public boolean deleteUser(Long id) {
-        try {
-            userRepository.deleteById(id);
-            return true;
-        } catch (Exception e) {
+        } else {
+            logger.warn("User with id {} not found for update", id);
             return false;
         }
     }
+
     @Override
-    public User save(User user) {
-        return userRepository.save(user);
+    public boolean deleteUser(Long id) {
+        logger.info("Deleting user with id: {}", id);
+        try {
+            userRepository.deleteById(id);
+            logger.info("User with id {} deleted successfully", id);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to delete user with id {}: {}", id, e.getMessage());
+            return false;
+        }
     }
 
+    @Override
+    public User save(User user) {
+        logger.debug("Saving user: {}", user.getUsername());
+        return userRepository.save(user);
+    }
 }

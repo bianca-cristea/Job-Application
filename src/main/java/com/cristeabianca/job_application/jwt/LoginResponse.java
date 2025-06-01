@@ -13,7 +13,7 @@ public class LoginResponse {
         this.roles = roles;
     }
 
-    // Getters
+
     public String getUsername() {
         return username;
     }

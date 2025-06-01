@@ -1,5 +1,6 @@
 package com.cristeabianca.job_application.role;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createRole(@RequestBody Role role) {
+    public ResponseEntity<String> createRole(@RequestBody @Valid Role role) {
         boolean created = roleService.createRole(role);
         return created ? new ResponseEntity<>("Role created", HttpStatus.CREATED)
                 : new ResponseEntity<>("Could not create role", HttpStatus.BAD_REQUEST);
