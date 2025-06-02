@@ -17,7 +17,7 @@ public class Company {
     private String name;
     private String description;
 
-    @JsonIgnore   //pentru a evita "Infinite recursion";se foloseste la relatii bidirectionale
+    @JsonIgnore
     @OneToMany(mappedBy = "company")
     private List<Job> jobs;
 
