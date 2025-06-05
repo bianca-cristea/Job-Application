@@ -1,15 +1,16 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./Login";
+import Register from "./Register";
 
 function App() {
   return (
-    <div className="App">
-       <h1>Job Application</h1>
-       <Login/>
-
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<Login />} />
+      </Routes>
+    </Router>
   );
 }
-
 export default App;
