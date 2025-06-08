@@ -59,10 +59,10 @@ public class ReviewServiceImpl implements ReviewService {
         if (companyService.getCompanyById(companyId) != null && reviewRepository.existsById(reviewId)) {
             Review review = reviewRepository.findById(reviewId).orElse(null);
             Company company = review.getCompany();
-            company.getReviews().remove(review);//scot review-ul din lista
-            review.setCompany(null); //rup legatura din partea review-ului
-            companyService.updateCompany(companyId, company);// se salveaza cu lista modificata de review-uri
-            reviewRepository.deleteById(reviewId);//aici se sterge efectiv review-ul din BD
+            company.getReviews().remove(review);
+            review.setCompany(null);
+            companyService.updateCompany(companyId, company);
+            reviewRepository.deleteById(reviewId);
             return true;
         }
         return false;

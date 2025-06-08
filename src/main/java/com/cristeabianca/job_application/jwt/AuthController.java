@@ -16,9 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -91,5 +89,17 @@ public class AuthController {
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
+    }
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Map<String,Object> profile = new HashMap<>();
+        profile.put("username",userDetails.getUsername());
+        profile.put("roles",userDetails.getAuthorities().stream()
+                .map(item->item.getAuthority())
+                .collect(Collectors.toList()));
+        profile.put("message","This is the user-specific content form backend");
+        return ResponseEntity.ok(profile);
     }
 }
