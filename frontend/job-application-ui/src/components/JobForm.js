@@ -8,7 +8,6 @@ export default function JobForm({ onSubmit, initialData }) {
   const [location, setLocation] = useState(initialData?.location || '');
   const [companyId, setCompanyId] = useState(initialData?.company?.id || '');
 
-  // Pentru simplificare, compania va fi doar un input text cu ID (poți extinde cu dropdown)
 
   function handleSubmit(e) {
     e.preventDefault();

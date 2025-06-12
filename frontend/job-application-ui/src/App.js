@@ -1,77 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import ApplicationsPage from './pages/ApplicationsPage';
-import CompaniesPage from './pages/CompaniesPage';
-import JobsPage from './pages/JobsPage';
-import LoginPage from './pages/Login';
-import RegisterPage from './pages/Register';
-import InterviewsPage from './pages/InterviewsPage';
-import ReviewsPage from './pages/ReviewsPage';
-import UsersPage from './pages/UsersPage';
-import './styles/index.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Applications from "./pages/ApplicationsPage";
+import Jobs from "./pages/JobsPage";
+import Companies from "./pages/CompaniesPage";
+import Interviews from "./pages/InterviewsPage";
+import Reviews from "./pages/ReviewsPage";
+import Users from "./pages/UsersPage";
+import Unauthorized from "./pages/Unauthorized";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuth } from "./hooks/useAuth";
+import { AuthProvider } from './context/AuthContext';
+
+function AppRoutes() {
+  const { logout } = useAuth();
+  return (
+    <>
+      <Navbar onLogout={logout} />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/applications" element={<ProtectedRoute><Applications /></ProtectedRoute>} />
+        <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+        <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
+        <Route path="/interviews" element={<ProtectedRoute><Interviews /></ProtectedRoute>} />
+        <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
+        <Route path="/user" element={<ProtectedRoute requiredRoles={['ADMIN']}><Users /></ProtectedRoute>} />
+      </Routes>
+    </>
+  );
+}
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return Boolean(localStorage.getItem('token'));
-  });
-
-    useEffect(() => {
-    const handleStorageChange = () => {
-      setIsLoggedIn(Boolean(localStorage.getItem('token')));
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-  };
-
   return (
-    <Router>
-      {isLoggedIn && <Navbar onLogout={handleLogout} />}
-      <Routes>
-        <Route
-          path="/applications"
-          element={isLoggedIn ? <ApplicationsPage /> : <Navigate to="/login" />}
-        />
-         <Route
-                  path="/interviews"
-                  element={isLoggedIn ? <InterviewsPage /> : <Navigate to="/login" />}
-         />
-           <Route
-                           path="/user"
-                           element={isLoggedIn ? <UsersPage /> : <Navigate to="/login" />}
-                  />
-         <Route
-                  path="/reviews"
-                  element={isLoggedIn ? <ReviewsPage /> : <Navigate to="/login" />}
-         />
-        <Route
-          path="/companies"
-          element={isLoggedIn ? <CompaniesPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/jobs"
-          element={isLoggedIn ? <JobsPage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/login"
-          element={!isLoggedIn ? <LoginPage setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/applications" />}
-        />
-        <Route
-          path="/register"
-          element={!isLoggedIn ? <RegisterPage /> : <Navigate to="/applications" />}
-        />
-        <Route
-          path="/"
-          element={<Navigate to={isLoggedIn ? "/applications" : "/login"} />}
-        />
-        <Route path="*" element={<h1>404 - Page Not Found</h1>} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
   );
 }
 
