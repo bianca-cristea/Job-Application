@@ -6,7 +6,8 @@ import Register from "./pages/Register";
 import Applications from "./pages/ApplicationsPage";
 import Jobs from "./pages/JobsPage";
 import Companies from "./pages/CompaniesPage";
-import Interviews from "./pages/InterviewsPage";
+import AdminInterviewsPage from "./pages/AdminInterviewsPage";
+import UserInterviewsPage from "./pages/UserInterviewsPage";
 import Reviews from "./pages/ReviewsPage";
 import Users from "./pages/UsersPage";
 import Unauthorized from "./pages/Unauthorized";
@@ -26,7 +27,9 @@ function AppRoutes() {
         <Route path="/applications" element={<ProtectedRoute><Applications /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
         <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
-        <Route path="/interviews" element={<ProtectedRoute><Interviews /></ProtectedRoute>} />
+         <Route path="/interviews/user" element={<UserInterviewsPage />} />
+        <Route path="/interviews/admin" element={<AdminInterviewsPage />} />
+
         <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
         <Route path="/user" element={<ProtectedRoute requiredRoles={['ADMIN']}><Users /></ProtectedRoute>} />
       </Routes>

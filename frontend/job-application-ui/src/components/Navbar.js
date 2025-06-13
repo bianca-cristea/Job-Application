@@ -1,48 +1,75 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
-export default function Navbar({ onLogout }) {
+export default function Navbar() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const linkStyle = (path) => ({
-    marginRight: '1rem',
-    textDecoration: location.pathname === path ? 'underline' : 'none',
-    color: location.pathname === path ? 'blue' : 'black',
+    marginRight: "1rem",
+    textDecoration: location.pathname === path ? "underline" : "none",
+    color: location.pathname === path ? "blue" : "black",
   });
 
   if (!user) {
     return (
-      <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc', marginBottom: '1rem' }}>
-        <Link to="/login" style={linkStyle('/login')}>Login</Link>
-        <Link to="/register" style={linkStyle('/register')}>Register</Link>
+      <nav style={{ padding: "1rem", borderBottom: "1px solid #ccc", marginBottom: "1rem" }}>
+        <Link to="/login" style={linkStyle("/login")}>
+          Login
+        </Link>
+        <Link to="/register" style={linkStyle("/register")}>
+          Register
+        </Link>
       </nav>
     );
   }
 
   return (
-    <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc', marginBottom: '1rem' }}>
-      {user.roles.includes('USER') && (
+    <nav style={{ padding: "1rem", borderBottom: "1px solid #ccc", marginBottom: "1rem" }}>
+      {user.roles && user.roles.includes("ROLE_USER") && (
         <>
-          <Link to="/applications" style={linkStyle('/applications')}>Applications</Link>
-          <Link to="/jobs" style={linkStyle('/jobs')}>Jobs</Link>
-          <Link to="/companies" style={linkStyle('/companies')}>Companies</Link>
-          <Link to="/interviews" style={linkStyle('/interviews')}>Interviews</Link>
-          <Link to="/reviews" style={linkStyle('/reviews')}>Reviews</Link>
+          <Link to="/jobs" style={linkStyle("/jobs")}>
+            Jobs
+          </Link>
+          <Link to="/companies" style={linkStyle("/companies")}>
+            Companies
+          </Link>
+          <Link to="/interviews/user" style={linkStyle("/user-interviews")}>
+            Interviews
+          </Link>
+          <Link to="/reviews" style={linkStyle("/reviews")}>
+            Reviews
+          </Link>
         </>
       )}
 
-      {user.roles.includes('ADMIN') && (
+      {user.roles && user.roles.includes("ROLE_ADMIN") && (
         <>
-          <Link to="/user" style={linkStyle('/user')}>Users</Link>
-          <Link to="/jobs" style={linkStyle('/jobs')}>Jobs</Link>
-          <Link to="/interviews" style={linkStyle('/interviews')}>Interviews</Link>
-          <Link to="/reviews" style={linkStyle('/reviews')}>Reviews</Link>
+          <Link to="/applications" style={linkStyle("/applications")}>
+            Applications
+          </Link>
+          <Link to="/user" style={linkStyle("/user")}>
+            Users
+          </Link>
+          <Link to="/jobs" style={linkStyle("/jobs")}>
+            Jobs
+          </Link>
+          <Link to="/companies" style={linkStyle("/companies")}>
+            Companies
+          </Link>
+          <Link to="/interviews/admin" style={linkStyle("/admin-interviews")}>
+            Interviews
+          </Link>
+          <Link to="/reviews" style={linkStyle("/reviews")}>
+            Reviews
+          </Link>
         </>
       )}
 
-      <button onClick={onLogout} style={{ marginLeft: '1rem' }}>Logout</button>
+      <button onClick={logout} style={{ marginLeft: "1rem" }}>
+        Logout
+      </button>
     </nav>
   );
 }

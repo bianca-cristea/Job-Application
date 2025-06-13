@@ -232,6 +232,18 @@ export async function updateUser(id, user) {
   });
   if (!res.ok) throw new Error('Failed to update user');
 }
+export async function getMyInterviews() {
+  const res = await fetch(`${API_BASE}/interviews/user`, { headers: getAuthHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch user interviews');
+  return res.json();
+}
+
+export async function getAllInterviewsGroupedByCompany() {
+  const res = await fetch(`${API_BASE}/interviews/admin`, { headers: getAuthHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch admin interviews');
+  return res.json();
+}
+
 
 export async function deleteUser(id) {
   const res = await fetch(`${API_BASE}/users/${id}`, {

@@ -66,6 +66,7 @@ export default function ApplicationsPage() {
               <>
                 <ApplicationForm
                   initialData={app}
+
                   onSubmit={(updated) => handleUpdate(app.id, updated)}
                 />
                 <button onClick={() => setEditingId(null)}>Cancel</button>

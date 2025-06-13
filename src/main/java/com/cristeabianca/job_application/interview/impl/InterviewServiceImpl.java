@@ -5,6 +5,8 @@ import com.cristeabianca.job_application.application.ApplicationRepository;
 import com.cristeabianca.job_application.interview.*;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class InterviewServiceImpl implements InterviewService {
 
@@ -20,6 +22,24 @@ public class InterviewServiceImpl implements InterviewService {
     public Interview getInterviewByApplication(Long applicationId) {
         return interviewRepository.findByApplicationId(applicationId);
     }
+
+    @Override
+    public List<Interview> getInterviewsForUser(Long userId) {
+        return interviewRepository.findAll().stream()
+                .filter(i -> i.getApplication().getUser().getId().equals(userId))
+                .toList();
+    }
+
+    @Override
+    public List<Interview> getAllInterviews() {
+        return interviewRepository.findAll();
+    }
+
+    @Override
+    public List<Interview> getInterviewsByUsername(String username) {
+        return interviewRepository.findByApplicationUserUsername(username);
+    }
+
 
     @Override
     public boolean createInterview(Long applicationId, Interview interview) {
