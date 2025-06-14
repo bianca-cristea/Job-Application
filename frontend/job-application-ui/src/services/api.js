@@ -39,6 +39,20 @@ export async function deleteJob(id) {
   });
   if (!res.ok) throw new Error('Failed to delete job');
 }
+export const applyToJob = async (jobId) => {
+  try {
+    const res = await fetch(`/jobs/${jobId}/apply`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      alert("Applied successfully");
+    } else {
+      alert("Failed to apply");
+    }
+  } catch {
+    alert("Failed to apply");
+  }
+};
 
 export async function getAllApplications() {
   const res = await fetch(`${API_BASE}/applications`, { headers: getAuthHeaders() });

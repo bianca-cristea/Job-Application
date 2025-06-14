@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { fetchJobs, createJob, updateJob, deleteJob } from '../services/api';
-import JobForm from '../components/JobForm';
+import React, { useEffect, useState } from "react";
+import { fetchJobs, createJob, updateJob, deleteJob, applyToJob } from "../services/api";
+import JobForm from "../components/JobForm";
+import { useAuth } from "../hooks/useAuth";
 
-export default function JobsPage() {
+export default function Jobs() {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
@@ -17,7 +19,7 @@ export default function JobsPage() {
       setJobs(data);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      setError("Failed to load jobs");
     }
   }
 
@@ -26,7 +28,7 @@ export default function JobsPage() {
       await createJob(job);
       await loadJobs();
     } catch (err) {
-      setError(err.message);
+      setError("Failed to create job");
     }
   }
 
@@ -36,7 +38,7 @@ export default function JobsPage() {
       setEditingId(null);
       await loadJobs();
     } catch (err) {
-      setError(err.message);
+      setError("Failed to update job");
     }
   }
 
@@ -45,25 +47,45 @@ export default function JobsPage() {
       await deleteJob(id);
       await loadJobs();
     } catch (err) {
-      setError(err.message);
+      setError("Failed to delete job");
     }
   }
 
+  async function handleApply(id) {
+    try {
+      await applyToJob(id);
+      alert("Applied successfully");
+    } catch {
+      alert("Failed to apply");
+    }
+  }
+
+  const isAdmin = user?.roles.includes("ROLE_ADMIN");
+  const isUser = user?.roles.includes("ROLE_USER");
+
   return (
-    <div style={{ padding: '1rem' }}>
+    <div style={{ padding: "1rem" }}>
       <h1>Jobs</h1>
 
-      <h2>Create New Job</h2>
-      <JobForm onSubmit={handleCreate} />
+      {isAdmin && (
+        <>
+          <h2>Create Job</h2>
+          <JobForm onSubmit={handleCreate} />
+        </>
+      )}
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <h2>Existing Jobs</h2>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+      <h2>Available Jobs</h2>
+      <ul style={{ listStyle: "none", padding: 0 }}>
         {jobs.map((job) => (
           <li
             key={job.id}
-            style={{ marginBottom: '1rem', border: '1px solid #ccc', padding: '1rem' }}
+            style={{
+              marginBottom: "1rem",
+              border: "1px solid #ccc",
+              padding: "1rem",
+            }}
           >
             {editingId === job.id ? (
               <>
@@ -75,19 +97,28 @@ export default function JobsPage() {
               </>
             ) : (
               <>
-                <p><b>ID:</b> {job.id}</p>
-                <p><b>Title:</b> {job.title}</p>
-                <p><b>Description:</b> {job.description}</p>
-                <p><b>Salary:</b> {job.minSalary} - {job.maxSalary}</p>
-                <p><b>Location:</b> {job.location}</p>
-                <p><b>Company ID:</b> {job.company?.id || 'N/A'}</p>
-                <button
-                  onClick={() => setEditingId(job.id)}
-                  style={{ marginRight: '0.5rem' }}
-                >
-                  Edit
-                </button>
-                <button onClick={() => handleDelete(job.id)}>Delete</button>
+                <h3>{job.title}</h3>
+                <p>{job.description}</p>
+                <p>
+                  <b>Salary:</b> {job.minSalary} - {job.maxSalary}
+                </p>
+                <p>
+                  <b>Location:</b> {job.location}
+                </p>
+                <p>
+                  <b>Company:</b> {job.company?.name || "N/A"}
+                </p>
+
+                {isAdmin && (
+                  <>
+                    <button onClick={() => setEditingId(job.id)}>Edit</button>
+                    <button onClick={() => handleDelete(job.id)}>Delete</button>
+                  </>
+                )}
+
+                {isUser && (
+                  <button onClick={() => handleApply(job.id)}>Apply</button>
+                )}
               </>
             )}
           </li>

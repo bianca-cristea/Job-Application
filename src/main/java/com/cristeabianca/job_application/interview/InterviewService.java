@@ -1,6 +1,7 @@
 package com.cristeabianca.job_application.interview;
 
 import java.util.List;
+import java.util.Map;
 
 public interface InterviewService {
     Interview getInterviewByApplication(Long applicationId);
@@ -11,4 +12,6 @@ public interface InterviewService {
     boolean createInterview(Long applicationId, Interview interview);
     boolean updateInterview(Long id, Interview interview);
     boolean deleteInterview(Long id);
+    Map<String, List<Interview>> getAllGroupedByCompany();
+
 }

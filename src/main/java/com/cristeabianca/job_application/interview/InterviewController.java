@@ -45,6 +45,10 @@ public class InterviewController {
                 new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping("/admin")
+    public ResponseEntity<?> getAllGroupedByCompany() {
+        return new ResponseEntity<>(interviewService.getAllGroupedByCompany(), HttpStatus.OK);
+    }
 
     @GetMapping("/user")
     public ResponseEntity<List<Interview>> getUserInterviews(@AuthenticationPrincipal UserDetails userDetails) {

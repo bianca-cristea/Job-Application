@@ -1,4 +1,5 @@
 package com.cristeabianca.job_application.job;
+import com.cristeabianca.job_application.application.Application;
 
 import com.cristeabianca.job_application.company.Company;
 import jakarta.validation.Valid;
@@ -29,6 +30,16 @@ public class JobController {
     public ResponseEntity<String> createNewJob(@RequestBody @Valid Job job){
         boolean result = jobService.createNewJob(job);
         return result?new ResponseEntity<>("Job created.",HttpStatus.CREATED):new ResponseEntity<>("Job could not be created.",HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/{id}/apply")
+    public ResponseEntity<String> applyToJob(@PathVariable Long id, @RequestBody @Valid Application application) {
+        boolean applied = jobService.applyToJob(id, application);
+        if (applied) {
+            return new ResponseEntity<>("Applied successfully", HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("Failed to apply", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/{id}")

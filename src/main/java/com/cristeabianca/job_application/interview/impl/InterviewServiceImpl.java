@@ -6,6 +6,8 @@ import com.cristeabianca.job_application.interview.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class InterviewServiceImpl implements InterviewService {
@@ -16,6 +18,11 @@ public class InterviewServiceImpl implements InterviewService {
     public InterviewServiceImpl(InterviewRepository interviewRepository, ApplicationRepository applicationRepository) {
         this.interviewRepository = interviewRepository;
         this.applicationRepository = applicationRepository;
+    }
+    @Override
+    public Map<String, List<Interview>> getAllGroupedByCompany() {
+        List<Interview> all = interviewRepository.findAll();
+        return all.stream().collect(Collectors.groupingBy(i -> i.getApplication().getJob().getCompany().getName()));
     }
 
     @Override

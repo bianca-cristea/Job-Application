@@ -1,9 +1,10 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
 
   const linkStyle = (path) => ({
@@ -11,6 +12,11 @@ export default function Navbar() {
     textDecoration: location.pathname === path ? "underline" : "none",
     color: location.pathname === path ? "blue" : "black",
   });
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   if (!user) {
     return (
@@ -67,7 +73,7 @@ export default function Navbar() {
         </>
       )}
 
-      <button onClick={logout} style={{ marginLeft: "1rem" }}>
+      <button onClick={handleLogout} style={{ marginLeft: "1rem" }}>
         Logout
       </button>
     </nav>

@@ -1,5 +1,7 @@
 package com.cristeabianca.job_application.job.impl;
 
+import com.cristeabianca.job_application.application.Application;
+import com.cristeabianca.job_application.application.ApplicationRepository;
 import com.cristeabianca.job_application.job.Job;
 import com.cristeabianca.job_application.job.JobRepository;
 import com.cristeabianca.job_application.job.JobService;
@@ -17,9 +19,21 @@ public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
 
-    public JobServiceImpl(JobRepository jobRepository) {
+    private final ApplicationRepository applicationRepository;
+
+    public JobServiceImpl(JobRepository jobRepository,ApplicationRepository applicationRepository) {
         this.jobRepository = jobRepository;
+        this.applicationRepository=applicationRepository;
     }
+    public boolean applyToJob(Long jobId, Application application) {
+        Job job = jobRepository.findById(jobId).orElse(null);
+        if (job == null) return false;
+
+        application.setJob(job);
+        applicationRepository.save(application);
+        return true;
+    }
+
 
     @Override
     public List<Job> showAllJobs() {

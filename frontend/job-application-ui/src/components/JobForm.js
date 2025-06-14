@@ -1,99 +1,111 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 
 export default function JobForm({ onSubmit, initialData }) {
-  const [title, setTitle] = useState(initialData?.title || '');
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [minSalary, setMinSalary] = useState(initialData?.minSalary || '');
-  const [maxSalary, setMaxSalary] = useState(initialData?.maxSalary || '');
-  const [location, setLocation] = useState(initialData?.location || '');
-  const [companyId, setCompanyId] = useState(initialData?.company?.id || '');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [minSalary, setMinSalary] = useState("");
+  const [maxSalary, setMaxSalary] = useState("");
+  const [location, setLocation] = useState("");
+  const [companyId, setCompanyId] = useState("");
 
 
-  function handleSubmit(e) {
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || "");
+      setDescription(initialData.description || "");
+      setMinSalary(initialData.minSalary || "");
+      setMaxSalary(initialData.maxSalary || "");
+      setLocation(initialData.location || "");
+      setCompanyId(initialData.company?.id || "");
+    }
+  }, [initialData]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!title || !description) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
     onSubmit({
       title,
       description,
       minSalary,
       maxSalary,
       location,
-      company: { id: companyId }, // backend-ul trebuie să accepte asta
+      company: companyId ? { id: Number(companyId) } : null,
     });
-  }
+
+
+    if (!initialData) {
+      setTitle("");
+      setDescription("");
+      setMinSalary("");
+      setMaxSalary("");
+      setLocation("");
+      setCompanyId("");
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
+    <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
       <div>
-        <label>
-          Title:
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            style={{ marginLeft: '0.5rem' }}
-          />
-        </label>
+        <label>Title*</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
       </div>
-      <div style={{ marginTop: '0.5rem' }}>
-        <label>
-          Description:
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            style={{ marginLeft: '0.5rem', width: '100%', height: '60px' }}
-          />
-        </label>
+
+      <div>
+        <label>Description*</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
       </div>
-      <div style={{ marginTop: '0.5rem' }}>
-        <label>
-          Min Salary:
-          <input
-            type="text"
-            value={minSalary}
-            onChange={(e) => setMinSalary(e.target.value)}
-            style={{ marginLeft: '0.5rem' }}
-          />
-        </label>
+
+      <div>
+        <label>Min Salary</label>
+        <input
+          type="number"
+          value={minSalary}
+          onChange={(e) => setMinSalary(e.target.value)}
+        />
       </div>
-      <div style={{ marginTop: '0.5rem' }}>
-        <label>
-          Max Salary:
-          <input
-            type="text"
-            value={maxSalary}
-            onChange={(e) => setMaxSalary(e.target.value)}
-            style={{ marginLeft: '0.5rem' }}
-          />
-        </label>
+
+      <div>
+        <label>Max Salary</label>
+        <input
+          type="number"
+          value={maxSalary}
+          onChange={(e) => setMaxSalary(e.target.value)}
+        />
       </div>
-      <div style={{ marginTop: '0.5rem' }}>
-        <label>
-          Location:
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            style={{ marginLeft: '0.5rem' }}
-          />
-        </label>
+
+      <div>
+        <label>Location</label>
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
       </div>
-      <div style={{ marginTop: '0.5rem' }}>
-        <label>
-          Company ID:
-          <input
-            type="number"
-            value={companyId}
-            onChange={(e) => setCompanyId(e.target.value)}
-            required
-            style={{ marginLeft: '0.5rem' }}
-          />
-        </label>
+
+      <div>
+        <label>Company ID</label>
+        <input
+          type="number"
+          value={companyId}
+          onChange={(e) => setCompanyId(e.target.value)}
+        />
       </div>
-      <button type="submit" style={{ marginTop: '0.5rem' }}>
-        {initialData ? 'Update' : 'Create'}
-      </button>
+
+      <button type="submit">{initialData ? "Update Job" : "Add Job"}</button>
     </form>
   );
 }
