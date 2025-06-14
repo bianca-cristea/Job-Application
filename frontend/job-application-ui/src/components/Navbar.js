@@ -55,7 +55,7 @@ export default function Navbar() {
           <Link to="/applications" style={linkStyle("/applications")}>
             Applications
           </Link>
-          <Link to="/user" style={linkStyle("/user")}>
+          <Link to="/users" style={linkStyle("/users")}>
             Users
           </Link>
           <Link to="/jobs" style={linkStyle("/jobs")}>

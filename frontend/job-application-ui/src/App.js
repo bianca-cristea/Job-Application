@@ -27,11 +27,11 @@ function AppRoutes() {
         <Route path="/applications" element={<ProtectedRoute><Applications /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
         <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
-         <Route path="/interviews/user" element={<UserInterviewsPage />} />
+         <Route path="/interviews/users" element={<UserInterviewsPage />} />
         <Route path="/interviews/admin" element={<AdminInterviewsPage />} />
 
         <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
-        <Route path="/user" element={<ProtectedRoute requiredRoles={['ADMIN']}><Users /></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute requiredRoles={['ROLE_ADMIN']}><Users /></ProtectedRoute>} />
       </Routes>
     </>
   );

@@ -16,30 +16,35 @@ export default function UserPage() {
   const [editId, setEditId] = useState(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [size, setSize] = useState(10);
+  const [sort, setSort] = useState('username');
 
-  useEffect(() => {
-    fetchRoles();
-    fetchUsers();
-  }, [page]);
+ useEffect(() => {
+   fetchRoles();
+   fetchUsers();
+ }, [page, size, sort]);
 
-  async function fetchUsers() {
-    try {
-      const data = await getAllUsers(page);
-      setUsers(data.content);
-      setTotalPages(data.totalPages);
-    } catch (err) {
-      console.error(err);
-    }
+
+async function fetchUsers() {
+  try {
+    const data = await getAllUsers(page, size, sort);
+    console.log('Fetched users data:', data);
+    setUsers(data.content);
+    setTotalPages(data.totalPages);
+  } catch (err) {
+    console.error(err);
   }
+}
 
-  async function fetchRoles() {
-    try {
-      const data = await getAllRoles();
-      setRoles(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }
+ async function fetchRoles() {
+   try {
+     const data = await getAllRoles();
+     setRoles(data);
+   } catch (err) {
+     console.error(err);
+   }
+ }
+
 
   async function handleCreateOrUpdate(e) {
     e.preventDefault();
@@ -56,6 +61,7 @@ export default function UserPage() {
       setUsername('');
       setPassword('');
       setSelectedRoles([]);
+      setPage(0);
       fetchUsers();
     } catch (err) {
       console.error(err);
@@ -72,8 +78,20 @@ export default function UserPage() {
   async function handleDelete(id) {
     if (window.confirm('Are you sure?')) {
       await deleteUser(id);
+      setPage(0);
       fetchUsers();
     }
+  }
+
+
+  function handleSizeChange(e) {
+    setSize(Number(e.target.value));
+    setPage(0);
+  }
+
+  function handleSortChange(e) {
+    setSort(e.target.value);
+    setPage(0);
   }
 
   return (
@@ -106,15 +124,45 @@ export default function UserPage() {
           ))}
         </select>
         <button type="submit">{editId ? 'Update' : 'Create'}</button>
-        {editId && <button onClick={() => {
-          setEditId(null);
-          setUsername('');
-          setPassword('');
-          setSelectedRoles([]);
-        }}>Cancel</button>}
+        {editId && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditId(null);
+              setUsername('');
+              setPassword('');
+              setSelectedRoles([]);
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
-      <h3>All Users (Page {page + 1}/{totalPages})</h3>
+
+      <div style={{ margin: '1rem 0' }}>
+        <label>
+          Sort by:{' '}
+          <select value={sort} onChange={handleSortChange}>
+            <option value="username">Username</option>
+            <option value="id">ID</option>
+
+          </select>
+        </label>
+
+        <label style={{ marginLeft: '1rem' }}>
+          Items per page:{' '}
+          <select value={size} onChange={handleSizeChange}>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+          </select>
+        </label>
+      </div>
+
+      <h3>
+        All Users (Page {page + 1} / {totalPages})
+      </h3>
       <ul>
         {users.map((u) => (
           <li key={u.id}>

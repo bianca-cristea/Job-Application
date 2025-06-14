@@ -221,13 +221,17 @@ export async function deleteRole(id) {
   if (!res.ok) throw new Error('Failed to delete role');
 }
 
-export async function getAllUsers(page = 0) {
-  const res = await fetch(`${API_BASE}/users?page=${page}&size=10`, {
+export async function getAllUsers(page = 0, size = 10, sortBy = 'username') {
+  const response = await fetch(`${API_BASE}/users?page=${page}&size=${size}&sortBy=${sortBy}`, {
     headers: getAuthHeaders(),
   });
-  if (!res.ok) throw new Error('Failed to fetch users');
-  return res.json();
+  if (!response.ok) throw new Error('Failed to fetch users');
+  return await response.json();
 }
+
+
+
+
 
 export async function createUser(user) {
   const res = await fetch(`${API_BASE}/users`, {
