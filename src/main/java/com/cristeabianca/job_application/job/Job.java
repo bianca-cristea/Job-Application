@@ -18,7 +18,9 @@ public class Job {
     private String maxSalary;
     private String location;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "company_id")
     private Company company;
 
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)

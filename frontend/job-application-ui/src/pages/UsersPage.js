@@ -115,6 +115,7 @@ async function fetchUsers() {
         <select
           multiple
           value={selectedRoles}
+          size={2}
           onChange={(e) =>
             setSelectedRoles(Array.from(e.target.selectedOptions, opt => Number(opt.value)))
           }

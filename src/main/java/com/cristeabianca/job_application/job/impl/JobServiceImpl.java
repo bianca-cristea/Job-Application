@@ -2,6 +2,8 @@ package com.cristeabianca.job_application.job.impl;
 
 import com.cristeabianca.job_application.application.Application;
 import com.cristeabianca.job_application.application.ApplicationRepository;
+import com.cristeabianca.job_application.company.Company;
+import com.cristeabianca.job_application.company.CompanyRepository;
 import com.cristeabianca.job_application.job.Job;
 import com.cristeabianca.job_application.job.JobRepository;
 import com.cristeabianca.job_application.job.JobService;
@@ -21,10 +23,16 @@ public class JobServiceImpl implements JobService {
 
     private final ApplicationRepository applicationRepository;
 
-    public JobServiceImpl(JobRepository jobRepository,ApplicationRepository applicationRepository) {
+    private final CompanyRepository companyRepository;
+
+    public JobServiceImpl(JobRepository jobRepository,
+                          ApplicationRepository applicationRepository,
+                          CompanyRepository companyRepository) {
         this.jobRepository = jobRepository;
-        this.applicationRepository=applicationRepository;
+        this.applicationRepository = applicationRepository;
+        this.companyRepository = companyRepository;
     }
+
     public boolean applyToJob(Long jobId, Application application) {
         Job job = jobRepository.findById(jobId).orElse(null);
         if (job == null) return false;
@@ -44,15 +52,24 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean createNewJob(Job job) {
         logger.info("Creating new job with title: {}", job.getTitle());
-        if (job != null) {
+        if (job != null && job.getCompany() != null) {
+            Long companyId = job.getCompany().getId();
+            Company company = companyRepository.findById(companyId).orElse(null);
+            if (company == null) {
+                logger.warn("Invalid company ID: {}", companyId);
+                return false;
+            }
+            job.setCompany(company);
             jobRepository.save(job);
-            logger.info("Job '{}' created successfully", job.getTitle());
+            logger.info("Job '{}' created successfully with company '{}'", job.getTitle(), company.getName());
             return true;
         } else {
-            logger.warn("Attempted to create null job");
+            logger.warn("Attempted to create job with null company");
             return false;
         }
     }
+
+
 
     @Override
     public Job getJobById(Long id) {

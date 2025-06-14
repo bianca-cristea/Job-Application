@@ -13,6 +13,7 @@ export default function Jobs() {
     loadJobs();
   }, []);
 
+
   async function loadJobs() {
     try {
       const data = await fetchJobs();
@@ -60,6 +61,9 @@ export default function Jobs() {
     }
   }
 
+
+
+
   const isAdmin = user?.roles.includes("ROLE_ADMIN");
   const isUser = user?.roles.includes("ROLE_USER");
 
@@ -71,6 +75,7 @@ export default function Jobs() {
         <>
           <h2>Create Job</h2>
           <JobForm onSubmit={handleCreate} />
+
         </>
       )}
 

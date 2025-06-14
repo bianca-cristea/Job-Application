@@ -14,7 +14,7 @@ export default function CompaniesPage() {
   const [error, setError] = useState(null);
 
   const { user } = useAuth();
-  const isAdmin = user?.roles.includes('ADMIN');
+  const isAdmin = user?.roles.includes('ROLE_ADMIN');
 
   useEffect(() => {
     loadCompanies();

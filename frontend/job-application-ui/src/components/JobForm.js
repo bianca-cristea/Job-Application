@@ -1,111 +1,117 @@
 import React, { useState, useEffect } from "react";
+import { getAllCompanies } from "../services/api";
 
-export default function JobForm({ onSubmit, initialData }) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [minSalary, setMinSalary] = useState("");
-  const [maxSalary, setMaxSalary] = useState("");
-  const [location, setLocation] = useState("");
-  const [companyId, setCompanyId] = useState("");
+export default function JobForm({ initialData = {}, onSubmit }) {
+  const [formData, setFormData] = useState({
+    title: initialData.title || "",
+    description: initialData.description || "",
+    minSalary: initialData.minSalary || "",
+    maxSalary: initialData.maxSalary || "",
+    location: initialData.location || "",
+    companyId: initialData.company?.id || "",
+  });
 
+  const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.title || "");
-      setDescription(initialData.description || "");
-      setMinSalary(initialData.minSalary || "");
-      setMaxSalary(initialData.maxSalary || "");
-      setLocation(initialData.location || "");
-      setCompanyId(initialData.company?.id || "");
+    async function loadCompanies() {
+      try {
+        const data = await getAllCompanies();
+        setCompanies(data);
+      } catch (err) {
+        console.error("Failed to load companies", err);
+      }
+    }
+    loadCompanies();
+  }, []);
+
+  useEffect(() => {
+    if (initialData && initialData.id) {
+      setFormData({
+        title: initialData.title || "",
+        description: initialData.description || "",
+        minSalary: initialData.minSalary || "",
+        maxSalary: initialData.maxSalary || "",
+        location: initialData.location || "",
+        companyId: initialData.company?.id || "",
+      });
     }
   }, [initialData]);
 
-  const handleSubmit = (e) => {
+  function handleSubmit(e) {
     e.preventDefault();
 
-    if (!title || !description) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
     onSubmit({
-      title,
-      description,
-      minSalary,
-      maxSalary,
-      location,
-      company: companyId ? { id: Number(companyId) } : null,
+      ...formData,
+      minSalary: Number(formData.minSalary),
+      maxSalary: Number(formData.maxSalary),
+      company: { id: Number(formData.companyId) },
     });
 
-
-    if (!initialData) {
-      setTitle("");
-      setDescription("");
-      setMinSalary("");
-      setMaxSalary("");
-      setLocation("");
-      setCompanyId("");
+    if (!initialData.id) {
+      setFormData({
+        title: "",
+        description: "",
+        minSalary: "",
+        maxSalary: "",
+        location: "",
+        companyId: "",
+      });
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
-      <div>
-        <label>Title*</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-
-      <div>
-        <label>Description*</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-      </div>
-
-      <div>
-        <label>Min Salary</label>
-        <input
-          type="number"
-          value={minSalary}
-          onChange={(e) => setMinSalary(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label>Max Salary</label>
-        <input
-          type="number"
-          value={maxSalary}
-          onChange={(e) => setMaxSalary(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label>Location</label>
-        <input
-          type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label>Company ID</label>
-        <input
-          type="number"
-          value={companyId}
-          onChange={(e) => setCompanyId(e.target.value)}
-        />
-      </div>
-
-      <button type="submit">{initialData ? "Update Job" : "Add Job"}</button>
+    <form className="form" onSubmit={handleSubmit}>
+      <input
+        className="input"
+        value={formData.title}
+        onChange={e => setFormData({ ...formData, title: e.target.value })}
+        placeholder="Title"
+        required
+      />
+      <textarea
+        className="textarea"
+        value={formData.description}
+        onChange={e => setFormData({ ...formData, description: e.target.value })}
+        placeholder="Description"
+        required
+      />
+      <input
+        className="input"
+        type="number"
+        value={formData.minSalary}
+        onChange={e => setFormData({ ...formData, minSalary: e.target.value })}
+        placeholder="Min Salary"
+      />
+      <input
+        className="input"
+        type="number"
+        value={formData.maxSalary}
+        onChange={e => setFormData({ ...formData, maxSalary: e.target.value })}
+        placeholder="Max Salary"
+      />
+      <input
+        className="input"
+        value={formData.location}
+        onChange={e => setFormData({ ...formData, location: e.target.value })}
+        placeholder="Location"
+      />
+      <select
+        className="select"
+        value={formData.companyId}
+        onChange={e => setFormData({ ...formData, companyId: e.target.value })}
+        required
+      >
+        <option value="" disabled>
+          Select company
+        </option>
+        {companies.map(c => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+      <button className="button" type="submit">Save</button>
     </form>
   );
 }
