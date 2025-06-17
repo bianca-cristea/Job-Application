@@ -7,10 +7,12 @@ import com.cristeabianca.job_application.company.CompanyRepository;
 import com.cristeabianca.job_application.job.Job;
 import com.cristeabianca.job_application.job.JobRepository;
 import com.cristeabianca.job_application.job.JobService;
+import com.cristeabianca.job_application.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,14 +35,20 @@ public class JobServiceImpl implements JobService {
         this.companyRepository = companyRepository;
     }
 
-    public boolean applyToJob(Long jobId, Application application) {
+    public boolean applyToJob(Long jobId, User authenticatedUser) {
         Job job = jobRepository.findById(jobId).orElse(null);
         if (job == null) return false;
 
-        application.setJob(job);
-        applicationRepository.save(application);
+        Application app = new Application();
+        app.setJob(job);
+        app.setUser(authenticatedUser);
+        app.setStatus("Pending");
+        app.setCreatedAt(LocalDateTime.now());
+
+        applicationRepository.save(app);
         return true;
     }
+
 
 
     @Override

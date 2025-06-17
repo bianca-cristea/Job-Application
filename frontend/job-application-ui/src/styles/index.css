@@ -26,6 +26,51 @@ body {
   gap: 1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+.applications-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.applications-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.applications-list {
+  list-style: none;
+  padding: 0;
+}
+
+.application-item {
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  transition: box-shadow 0.3s ease;
+}
+
+.application-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.application-item p {
+  margin: 6px 0;
+  color: #555;
+}
+
+.access-denied {
+  text-align: center;
+  color: red;
+  font-weight: bold;
+  margin-top: 50px;
+}
 
 .input,
 .textarea,

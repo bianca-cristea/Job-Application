@@ -1,6 +1,7 @@
 package com.cristeabianca.job_application.application;
 
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,14 +17,16 @@ public class ApplicationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Application>> getAll() {
+    public ResponseEntity<List<Application>> getAllApplications() {
         return new ResponseEntity<>(applicationService.getAllApplications(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Application> getById(@PathVariable Long id) {
         Application app = applicationService.getApplicationById(id);
-        return app != null ? new ResponseEntity<>(app, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return app != null
+                ? new ResponseEntity<>(app, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/user/{userId}")
@@ -37,23 +40,28 @@ public class ApplicationController {
     }
 
     @PostMapping("/user/{userId}/job/{jobId}")
-    public ResponseEntity<String> create(@RequestBody Application app, @PathVariable Long userId, @PathVariable Long jobId) {
+    public ResponseEntity<String> create(@RequestBody Application app,
+                                         @PathVariable Long userId,
+                                         @PathVariable Long jobId) {
         boolean result = applicationService.createApplication(app, userId, jobId);
-        return result ? new ResponseEntity<>("Application created", HttpStatus.CREATED) :
-                new ResponseEntity<>("Failed to create application", HttpStatus.BAD_REQUEST);
+        return result
+                ? new ResponseEntity<>("Application created", HttpStatus.CREATED)
+                : new ResponseEntity<>("Failed to create application", HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> update(@PathVariable Long id, @RequestBody Application app) {
-        return applicationService.updateApplication(id, app) ?
-                new ResponseEntity<>("Updated", HttpStatus.OK) :
-                new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
+        boolean updated = applicationService.updateApplication(id, app);
+        return updated
+                ? new ResponseEntity<>("Updated", HttpStatus.OK)
+                : new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
-        return applicationService.deleteApplication(id) ?
-                new ResponseEntity<>("Deleted", HttpStatus.OK) :
-                new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
+        boolean deleted = applicationService.deleteApplication(id);
+        return deleted
+                ? new ResponseEntity<>("Deleted", HttpStatus.OK)
+                : new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 }

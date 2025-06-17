@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Size;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties({"applications"})
 @Entity
 @Table(name = "app_users")
 public class User {
