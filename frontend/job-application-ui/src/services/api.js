@@ -1,6 +1,6 @@
 const API_BASE = "http://localhost:8080";
 
-function getAuthHeaders() {
+ function getAuthHeaders() {
   const token = localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
@@ -57,16 +57,14 @@ export const applyToJob = async (jobId) => {
 };
 
 
-export async function getAllApplications() {
-  const res = await fetch(`${API_BASE}/applications`, { headers: getAuthHeaders() });
-  if (!res.ok) throw new Error('Error fetching applications');
-  return res.json();
-}
+
+
+
 export async function getAllReviewsAdmin() {
   const res = await fetch(`${API_BASE}/companies/reviews/admin/all`, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error('Error fetching admin reviews');
   return res.json();
-}
+};
 
 export const createApplication = async (userId, jobId, applicationData) => {
   const response = await fetch(`http://localhost:8080/applications/user/{userId}/job/{jobId}`, {
@@ -276,6 +274,20 @@ export async function getAllInterviewsGroupedByCompany() {
   if (!res.ok) throw new Error('Failed to fetch admin interviews');
   return res.json();
 }
+export async function getAllApplications() {
+  const res = await fetch(`${API_BASE}/applications`, { headers: getAuthHeaders() });
+  if (!res.ok) throw new Error('Error fetching applications');
+  return res.json();
+}
+
+export async function markApplicationAsInterview(id) {
+  const res = await fetch(`${API_BASE}/applications/${id}/status?status=interview`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error("Failed to mark as interview");
+}
+
 
 
 export async function deleteUser(id) {

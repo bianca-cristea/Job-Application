@@ -1,19 +1,28 @@
 package com.cristeabianca.job_application.application;
 
+import com.cristeabianca.job_application.interview.Interview;
+import com.cristeabianca.job_application.interview.InterviewRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/applications")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final ApplicationRepository applicationRepository;
+    private final InterviewRepository interviewRepository;
 
-    public ApplicationController(ApplicationService applicationService) {
+    public ApplicationController(ApplicationService applicationService,
+                                 ApplicationRepository applicationRepository,
+                                 InterviewRepository interviewRepository) {
         this.applicationService = applicationService;
+        this.applicationRepository = applicationRepository;
+        this.interviewRepository = interviewRepository;
     }
 
     @GetMapping
@@ -37,6 +46,26 @@ public class ApplicationController {
     @GetMapping("/job/{jobId}")
     public ResponseEntity<List<Application>> getByJob(@PathVariable Long jobId) {
         return new ResponseEntity<>(applicationService.getApplicationsByJob(jobId), HttpStatus.OK);
+    }
+
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<String> updateApplicationStatus(@PathVariable Long id, @RequestParam String status) {
+        Optional<Application> optionalApplication = applicationRepository.findById(id);
+        if (optionalApplication.isEmpty()) {
+            return new ResponseEntity<>("Application not found", HttpStatus.NOT_FOUND);
+        }
+        Application application = optionalApplication.get();
+        application.setStatus(status);
+
+        if ("interview".equalsIgnoreCase(status) && application.getInterview() == null) {
+            Interview interview = new Interview();
+            interview.setApplication(application);
+            interviewRepository.save(interview);
+        }
+
+        applicationRepository.save(application);
+        return new ResponseEntity<>("Status updated", HttpStatus.OK);
     }
 
     @PostMapping("/user/{userId}/job/{jobId}")

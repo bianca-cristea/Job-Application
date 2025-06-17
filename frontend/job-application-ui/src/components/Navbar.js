@@ -41,7 +41,7 @@ export default function Navbar() {
           <Link to="/companies" style={linkStyle("/companies")}>
             Companies
           </Link>
-          <Link to="/interviews/user" style={linkStyle("/user-interviews")}>
+          <Link to="/interviews" style={linkStyle("/interviews")}>
             Interviews
           </Link>
           <Link to="/reviews" style={linkStyle("/reviews")}>
@@ -64,7 +64,7 @@ export default function Navbar() {
           <Link to="/companies" style={linkStyle("/companies")}>
             Companies
           </Link>
-          <Link to="/interviews/admin" style={linkStyle("/admin-interviews")}>
+          <Link to="/interviews" style={linkStyle("/interviews")}>
             Interviews
           </Link>
           <Link to="/reviews" style={linkStyle("/reviews")}>

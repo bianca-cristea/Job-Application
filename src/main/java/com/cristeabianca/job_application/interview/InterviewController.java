@@ -1,20 +1,29 @@
 package com.cristeabianca.job_application.interview;
 
+import com.cristeabianca.job_application.application.ApplicationRepository;
+import com.cristeabianca.job_application.application.ApplicationService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/interviews")
 public class InterviewController {
 
     private final InterviewService interviewService;
+    private final ApplicationRepository applicationRepository;
+    private final InterviewRepository interviewRepository;
 
-    public InterviewController(InterviewService interviewService) {
+    public InterviewController(InterviewService interviewService,
+                                 ApplicationRepository applicationRepository,
+                                 InterviewRepository interviewRepository) {
         this.interviewService = interviewService;
+        this.applicationRepository = applicationRepository;
+        this.interviewRepository = interviewRepository;
     }
 
     @GetMapping("/application/{applicationId}")
@@ -22,6 +31,10 @@ public class InterviewController {
         Interview interview = interviewService.getInterviewByApplication(applicationId);
         return interview != null ? new ResponseEntity<>(interview, HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    @GetMapping
+    public List<Interview> getAllInterviews() {
+        return interviewRepository.findAll();
     }
 
     @PostMapping("/application/{applicationId}")
@@ -48,6 +61,18 @@ public class InterviewController {
     @GetMapping("/admin")
     public ResponseEntity<?> getAllGroupedByCompany() {
         return new ResponseEntity<>(interviewService.getAllGroupedByCompany(), HttpStatus.OK);
+    }
+    @PutMapping("/{interviewId}")
+    public ResponseEntity<String> updateInterview(@PathVariable Long interviewId, @RequestBody Interview updatedInterview) {
+        Optional<Interview> optionalInterview = interviewRepository.findById(interviewId);
+        if (optionalInterview.isEmpty()) {
+            return new ResponseEntity<>("Interview not found", HttpStatus.NOT_FOUND);
+        }
+        Interview interview = optionalInterview.get();
+        interview.setScheduledAt(updatedInterview.getScheduledAt());
+        interview.setLocation(updatedInterview.getLocation());
+        interviewRepository.save(interview);
+        return new ResponseEntity<>("Interview updated", HttpStatus.OK);
     }
 
     @GetMapping("/user")

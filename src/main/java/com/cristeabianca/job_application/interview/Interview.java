@@ -4,6 +4,7 @@ import com.cristeabianca.job_application.application.Application;
 import jakarta.persistence.*;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,7 +15,9 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime scheduledAt;
+    @Column(name = "scheduled_at")
+    private LocalDate scheduledAt;
+
     private String location;
 
     @OneToOne
@@ -24,7 +27,7 @@ public class Interview {
     public Interview() {
     }
 
-    public Interview(Long id, LocalDateTime scheduledAt, String location, Application application) {
+    public Interview(Long id, LocalDate scheduledAt, String location, Application application) {
         this.id = id;
         this.scheduledAt = scheduledAt;
         this.location = location;
@@ -39,11 +42,11 @@ public class Interview {
         this.id = id;
     }
 
-    public LocalDateTime getScheduledAt() {
+    public LocalDate getScheduledAt() {
         return scheduledAt;
     }
 
-    public void setScheduledAt(LocalDateTime scheduledAt) {
+    public void setScheduledAt(LocalDate scheduledAt) {
         this.scheduledAt = scheduledAt;
     }
 

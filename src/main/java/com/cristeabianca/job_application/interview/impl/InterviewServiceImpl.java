@@ -53,11 +53,17 @@ public class InterviewServiceImpl implements InterviewService {
         Application app = applicationRepository.findById(applicationId).orElse(null);
         if (app != null) {
             interview.setApplication(app);
+
+               if (interview.getScheduledAt() == null) {
+                interview.setScheduledAt(java.time.LocalDate.now().plusDays(5));
+            }
+
             interviewRepository.save(interview);
             return true;
         }
         return false;
     }
+
 
     @Override
     public boolean updateInterview(Long id, Interview updated) {
