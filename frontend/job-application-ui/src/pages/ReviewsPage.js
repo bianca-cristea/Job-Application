@@ -14,7 +14,7 @@ export default function ReviewsPage({ companyId = 1 }) {
   const [error, setError] = useState(null);
 
   const { user } = useAuth();
-  const isAdmin = user?.roles.includes('ADMIN');
+  const isAdmin = user?.roles.includes('ROLE_ADMIN');
 
   useEffect(() => {
     fetchReviews();

@@ -5,6 +5,8 @@ import com.cristeabianca.job_application.company.CompanyService;
 import com.cristeabianca.job_application.review.Review;
 import com.cristeabianca.job_application.review.ReviewRepository;
 import com.cristeabianca.job_application.review.ReviewService;
+import com.cristeabianca.job_application.user.User;
+import com.cristeabianca.job_application.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,10 +16,12 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final CompanyService companyService;
+    private final UserRepository userRepository;
 
-    public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService) {
+    public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService,UserRepository userRepository) {
         this.reviewRepository = reviewRepository;
         this.companyService = companyService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -27,15 +31,19 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public boolean addReview(Review review, Long companyId) {
+    public boolean addReview(Review review, Long companyId, String username) {
         Company company = companyService.getCompanyById(companyId);
-        if (company != null) {
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        if (company != null && user != null) {
             review.setCompany(company);
+            review.setUser(user);
             reviewRepository.save(review);
             return true;
         }
         return false;
     }
+
 
     @Override
     public Review getReview(Long companyId, Long reviewId) {
@@ -44,27 +52,43 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public boolean updateReview(Long companyId, Long reviewId, Review updatedReview) {
-        if (companyService.getCompanyById(companyId) != null) {
-            updatedReview.setCompany(companyService.getCompanyById(companyId));
-            updatedReview.setId(reviewId);
-            reviewRepository.save(updatedReview);
+    public boolean updateReview(Long reviewId, Long companyId, String username, Review updatedReview) {
+        Company company = companyService.getCompanyById(companyId);
+        Review existingReview = reviewRepository.findById(reviewId).orElse(null);
+
+        if (company != null && existingReview != null &&
+                existingReview.getUser().getUsername().equals(username)) {
+
+            existingReview.setTitle(updatedReview.getTitle());
+            existingReview.setDescription(updatedReview.getDescription());
+            existingReview.setRating(updatedReview.getRating());
+
+            reviewRepository.save(existingReview);
             return true;
         }
+
         return false;
     }
 
     @Override
-    public boolean deleteReview(Long companyId, Long reviewId) {
-        if (companyService.getCompanyById(companyId) != null && reviewRepository.existsById(reviewId)) {
-            Review review = reviewRepository.findById(reviewId).orElse(null);
-            Company company = review.getCompany();
-            company.getReviews().remove(review);
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAll();
+    }
+    @Override
+    public boolean deleteReview(Long reviewId, Long companyId, String username) {
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        Company company = companyService.getCompanyById(companyId);
+
+        if (company != null && review != null &&
+                review.getCompany().getId().equals(companyId) &&
+                review.getUser().getUsername().equals(username)) {
+
             review.setCompany(null);
-            companyService.updateCompany(companyId, company);
             reviewRepository.deleteById(reviewId);
             return true;
         }
+
         return false;
     }
+
 }

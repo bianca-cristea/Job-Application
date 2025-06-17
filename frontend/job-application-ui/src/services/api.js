@@ -41,9 +41,11 @@ export async function deleteJob(id) {
 }
 export const applyToJob = async (jobId) => {
   try {
-    const res = await fetch(`/jobs/${jobId}/apply`, {
+    const res = await fetch(`${API_BASE}/jobs/${jobId}/apply`, {
       method: "POST",
+      headers: getAuthHeaders(),
     });
+
     if (res.ok) {
       alert("Applied successfully");
     } else {
@@ -54,9 +56,15 @@ export const applyToJob = async (jobId) => {
   }
 };
 
+
 export async function getAllApplications() {
   const res = await fetch(`${API_BASE}/applications`, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error('Error fetching applications');
+  return res.json();
+}
+export async function getAllReviewsAdmin() {
+  const res = await fetch(`${API_BASE}/companies/reviews/admin/all`, { headers: getAuthHeaders() });
+  if (!res.ok) throw new Error('Error fetching admin reviews');
   return res.json();
 }
 
@@ -132,13 +140,20 @@ export async function getAllReviews(companyId) {
 }
 
 export async function addReview(review, companyId) {
-  const res = await fetch(`${API_BASE}/companies/${companyId}/reviews`, {
+  const response = await fetch(`/companies/${companyId}/reviews`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
     body: JSON.stringify(review),
   });
-  if (!res.ok) throw new Error('Error creating review');
+  if (!response.ok) {
+    throw new Error('Failed to add review');
+  }
+  return response.json();
 }
+
 
 export async function updateReview(companyId, reviewId, updated) {
   const res = await fetch(`${API_BASE}/companies/${companyId}/reviews/${reviewId}`, {

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -46,9 +47,12 @@ class ReviewControllerTest {
 
     @Test
     void addReview_ReturnsOk_WhenSuccess() {
-        when(reviewService.addReview(any(Review.class), eq(1L))).thenReturn(true);
+        when(reviewService.addReview(any(Review.class), eq(1L), eq("testuser"))).thenReturn(true);
 
-        ResponseEntity<String> response = reviewController.addReview(1L, review);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser");
+
+        ResponseEntity<String> response = reviewController.addReview(1L, review, userDetails);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals("Review added successfully", response.getBody());
@@ -56,9 +60,12 @@ class ReviewControllerTest {
 
     @Test
     void addReview_ReturnsNotFound_WhenFail() {
-        when(reviewService.addReview(any(Review.class), eq(1L))).thenReturn(false);
+        when(reviewService.addReview(any(Review.class), eq(1L), eq("testuser"))).thenReturn(false);
 
-        ResponseEntity<String> response = reviewController.addReview(1L, review);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser");
+
+        ResponseEntity<String> response = reviewController.addReview(1L, review, userDetails);
 
         assertEquals(404, response.getStatusCodeValue());
         assertEquals("Review could not be added.", response.getBody());
@@ -76,9 +83,12 @@ class ReviewControllerTest {
 
     @Test
     void updateReview_ReturnsOk_WhenSuccess() {
-        when(reviewService.updateReview(1L, 1L, review)).thenReturn(true);
+        when(reviewService.updateReview(1L, 1L, "testuser", review)).thenReturn(true);
 
-        ResponseEntity<String> response = reviewController.updateReview(1L, 1L, review);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser");
+
+        ResponseEntity<String> response = reviewController.updateReview(1L, 1L, review, userDetails);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals("Review updated successfully", response.getBody());
@@ -86,9 +96,12 @@ class ReviewControllerTest {
 
     @Test
     void updateReview_ReturnsNotFound_WhenFail() {
-        when(reviewService.updateReview(1L, 1L, review)).thenReturn(false);
+        when(reviewService.updateReview(1L, 1L, "testuser", review)).thenReturn(false);
 
-        ResponseEntity<String> response = reviewController.updateReview(1L, 1L, review);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser");
+
+        ResponseEntity<String> response = reviewController.updateReview(1L, 1L, review, userDetails);
 
         assertEquals(404, response.getStatusCodeValue());
         assertEquals("Review could not be updated.", response.getBody());
@@ -96,9 +109,12 @@ class ReviewControllerTest {
 
     @Test
     void deleteReview_ReturnsOk_WhenSuccess() {
-        when(reviewService.deleteReview(1L, 1L)).thenReturn(true);
+        when(reviewService.deleteReview(1L, 1L, "testuser")).thenReturn(true);
 
-        ResponseEntity<String> response = reviewController.deleteReview(1L, 1L);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser");
+
+        ResponseEntity<String> response = reviewController.deleteReview(1L, 1L, userDetails);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals("Review deleted successfully", response.getBody());
@@ -106,9 +122,12 @@ class ReviewControllerTest {
 
     @Test
     void deleteReview_ReturnsNotFound_WhenFail() {
-        when(reviewService.deleteReview(1L, 1L)).thenReturn(false);
+        when(reviewService.deleteReview(1L, 1L, "testuser")).thenReturn(false);
 
-        ResponseEntity<String> response = reviewController.deleteReview(1L, 1L);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser");
+
+        ResponseEntity<String> response = reviewController.deleteReview(1L, 1L, userDetails);
 
         assertEquals(404, response.getStatusCodeValue());
         assertEquals("Review could not be deleted.", response.getBody());
