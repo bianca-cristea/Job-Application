@@ -63,7 +63,7 @@ export const applyToJob = async (jobId) => {
 
 
 export async function getAllReviewsAdmin() {
-  const res = await fetch(`${API_BASE}/companies/reviews/admin/all`, { headers: getAuthHeaders() });
+  const res = await fetch(`${API_BASE}/companies/admin/all`, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error('Error fetching admin reviews');
   return res.json();
 };
@@ -139,19 +139,24 @@ export async function getAllReviews(companyId) {
   return res.json();
 }
 
+
 export async function addReview(review, companyId) {
-  const response = await fetch(`/companies/${companyId}/reviews`, {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`http://localhost:8080/companies/${companyId}/reviews`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      ...(token && { Authorization: `Bearer ${token}` }),
     },
     body: JSON.stringify(review),
   });
-  if (!response.ok) {
-    throw new Error('Failed to add review');
+
+  if (!res.ok) {
+    const text = await res.text();  // <-- aici îl citești ca text, nu json
+    throw new Error(text || 'Failed to add review');
   }
-  return response.json();
+
+  return res.text(); // <-- schimbă și aici
 }
 
 

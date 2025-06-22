@@ -10,7 +10,6 @@ export default function InterviewsPage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // Exemplu de extragere rol din localStorage (ajustează după cum stochezi rolul)
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     setIsAdmin(userInfo.role === "ADMIN");
 

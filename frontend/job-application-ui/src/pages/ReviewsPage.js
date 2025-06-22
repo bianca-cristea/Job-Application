@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   getAllReviews,
+  getAllReviewsAdmin,
   addReview,
   updateReview,
   deleteReview,
@@ -17,10 +18,27 @@ export default function ReviewsPage({ companyId = 1 }) {
   const isAdmin = user?.roles.includes('ROLE_ADMIN');
 
   useEffect(() => {
-    fetchReviews();
-  }, [companyId]);
+    if (isAdmin) {
+      fetchAllReviewsAdmin();
+    } else {
+      fetchCompanyReviews();
+    }
+  }, [companyId, isAdmin]);
+function handleAdd(review) {
+  fetch('/reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(review),
+  }).then(res => {
+    if (res.ok) {
+      alert('Review added successfully');
+    } else {
+      alert('Failed to add review');
+    }
+  });
+}
 
-  async function fetchReviews() {
+  async function fetchCompanyReviews() {
     try {
       const data = await getAllReviews(companyId);
       setReviews(data);
@@ -29,10 +47,21 @@ export default function ReviewsPage({ companyId = 1 }) {
     }
   }
 
+  async function fetchAllReviewsAdmin() {
+    try {
+      const data = await getAllReviewsAdmin();
+      setReviews(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function handleAdd(review) {
     try {
-      await addReview(review, companyId);
-      await fetchReviews();
+      await addReview(review, review.companyId);
+
+      if (isAdmin) fetchAllReviewsAdmin();
+      else fetchCompanyReviews();
     } catch (err) {
       setError(err.message);
     }
@@ -42,7 +71,8 @@ export default function ReviewsPage({ companyId = 1 }) {
     try {
       await updateReview(companyId, reviewId, updated);
       setEditing(null);
-      await fetchReviews();
+      if (isAdmin) fetchAllReviewsAdmin();
+      else fetchCompanyReviews();
     } catch (err) {
       setError(err.message);
     }
@@ -51,7 +81,8 @@ export default function ReviewsPage({ companyId = 1 }) {
   async function handleDelete(reviewId) {
     try {
       await deleteReview(companyId, reviewId);
-      await fetchReviews();
+      if (isAdmin) fetchAllReviewsAdmin();
+      else fetchCompanyReviews();
     } catch (err) {
       setError(err.message);
     }
@@ -59,7 +90,7 @@ export default function ReviewsPage({ companyId = 1 }) {
 
   return (
     <div style={{ padding: '1rem' }}>
-      <h1>Reviews for Company {companyId}</h1>
+      <h1>Reviews for Companies</h1>
 
       {!isAdmin && (
         <>
@@ -83,10 +114,14 @@ export default function ReviewsPage({ companyId = 1 }) {
               </>
             ) : (
               <>
-                <p><b>Title:</b> {r.title}</p>
-                <p><b>Description:</b> {r.description}</p>
-                <p><b>Rating:</b> {r.rating}</p>
-                {!isAdmin && (
+              <p><b>Title:</b> {r.title}</p>
+              <p><b>Description:</b> {r.description}</p>
+              <p><b>Rating:</b> {r.rating}</p>
+              <p><b>Company:</b> {r.company?.name}</p>
+
+
+
+                {!isAdmin && r.user?.username === user.username && (
                   <>
                     <button onClick={() => setEditing(r.id)} style={{ marginRight: '0.5rem' }}>Edit</button>
                     <button onClick={() => handleDelete(r.id)}>Delete</button>
