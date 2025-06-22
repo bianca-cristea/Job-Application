@@ -21,7 +21,7 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         login(data.token);
-        navigate("/applications");
+        navigate("/jobs");
       } else {
         setMessage("Login failed. Please check your credentials.");
       }

@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
     token: null,
     user: null,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -19,11 +20,11 @@ export const AuthProvider = ({ children }) => {
         user: JSON.parse(user),
       });
     }
+    setLoading(false);
   }, []);
 
   const login = (token) => {
     const decoded = jwtDecode(token);
-    console.log("Decoded user:", decoded);
     setAuthState({
       token,
       user: decoded,
@@ -48,6 +49,7 @@ export const AuthProvider = ({ children }) => {
         user: authState.user,
         login,
         logout,
+        loading,
       }}
     >
       {children}

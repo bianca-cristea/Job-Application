@@ -1,6 +1,7 @@
 package com.cristeabianca.job_application.interview;
 
 import com.cristeabianca.job_application.application.Application;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 
 
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "interview")
 public class Interview {
 
@@ -16,18 +18,18 @@ public class Interview {
     private Long id;
 
     @Column(name = "scheduled_at")
-    private LocalDate scheduledAt;
+    private LocalDateTime scheduledAt;
 
     private String location;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "application_id")
     private Application application;
 
     public Interview() {
     }
 
-    public Interview(Long id, LocalDate scheduledAt, String location, Application application) {
+    public Interview(Long id, LocalDateTime scheduledAt, String location, Application application) {
         this.id = id;
         this.scheduledAt = scheduledAt;
         this.location = location;
@@ -42,11 +44,11 @@ public class Interview {
         this.id = id;
     }
 
-    public LocalDate getScheduledAt() {
+    public LocalDateTime getScheduledAt() {
         return scheduledAt;
     }
 
-    public void setScheduledAt(LocalDate scheduledAt) {
+    public void setScheduledAt(LocalDateTime scheduledAt) {
         this.scheduledAt = scheduledAt;
     }
 

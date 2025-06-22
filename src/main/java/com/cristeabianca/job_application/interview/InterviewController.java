@@ -44,19 +44,25 @@ public class InterviewController {
                 new ResponseEntity<>("Failed", HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody Interview interview) {
-        return interviewService.updateInterview(id, interview) ?
-                new ResponseEntity<>("Interview updated", HttpStatus.OK) :
-                new ResponseEntity<>("Interview not found", HttpStatus.NOT_FOUND);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInterview(@PathVariable Long id) {
+        System.out.println("Received delete request for interview id: " + id);
+        if (interviewService.deleteInterview(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @GetMapping("/dto")
+    public ResponseEntity<List<InterviewDTO>> getAllInterviewsDTO() {
+        return ResponseEntity.ok(interviewService.getAllInterviewsDTO());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
-        return interviewService.deleteInterview(id) ?
-                new ResponseEntity<>("Deleted", HttpStatus.OK) :
-                new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
-    }
+
+
+
+
+
 
     @GetMapping("/admin")
     public ResponseEntity<?> getAllGroupedByCompany() {
@@ -68,12 +74,16 @@ public class InterviewController {
         if (optionalInterview.isEmpty()) {
             return new ResponseEntity<>("Interview not found", HttpStatus.NOT_FOUND);
         }
+        if (updatedInterview.getLocation() == null || updatedInterview.getScheduledAt() == null) {
+            return new ResponseEntity<>("Invalid interview data", HttpStatus.BAD_REQUEST);
+        }
         Interview interview = optionalInterview.get();
         interview.setScheduledAt(updatedInterview.getScheduledAt());
         interview.setLocation(updatedInterview.getLocation());
         interviewRepository.save(interview);
         return new ResponseEntity<>("Interview updated", HttpStatus.OK);
     }
+
 
     @GetMapping("/user")
     public ResponseEntity<List<Interview>> getUserInterviews(@AuthenticationPrincipal UserDetails userDetails) {

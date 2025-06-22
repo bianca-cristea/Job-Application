@@ -37,6 +37,15 @@ public class UserController {
         return new ResponseEntity<>(usersPage, HttpStatus.OK);
     }
 
+    @PostMapping
+    public ResponseEntity<String> createUser(@RequestBody @Valid User user) {
+        boolean created = userService.createUser(user);
+        if (created) {
+            return new ResponseEntity<>("User created", HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("Could not create user", HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {

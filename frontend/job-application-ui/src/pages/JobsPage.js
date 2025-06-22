@@ -122,7 +122,12 @@ export default function Jobs() {
                 )}
 
                 {isUser && (
-                  <button onClick={() => handleApply(job.id)}>Apply</button>
+                <button onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleApply(job.id);
+                }}>Apply</button>
+
                 )}
               </>
             )}

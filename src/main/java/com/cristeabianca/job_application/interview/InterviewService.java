@@ -11,6 +11,8 @@ public interface InterviewService {
     List<Interview> getInterviewsByUsername(String username);
     boolean createInterview(Long applicationId, Interview interview);
     boolean updateInterview(Long id, Interview interview);
+    List<InterviewDTO> getAllInterviewsDTO();
+
     boolean deleteInterview(Long id);
     Map<String, List<Interview>> getAllGroupedByCompany();
 

@@ -15,7 +15,9 @@ export async function fetchJobs() {
 }
 
 export async function createJob(job) {
-  const res = await fetch(`${API_BASE}/jobs`, {
+const res = await fetch(`${API_BASE}/jobs`, {
+
+
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(job),
@@ -67,7 +69,7 @@ export async function getAllReviewsAdmin() {
 };
 
 export const createApplication = async (userId, jobId, applicationData) => {
-  const response = await fetch(`http://localhost:8080/applications/user/{userId}/job/{jobId}`, {
+  const response = await fetch(`${API_BASE}/applications/user/${userId}/job/${jobId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(applicationData),

@@ -3,10 +3,13 @@ package com.cristeabianca.job_application.interview.impl;
 import com.cristeabianca.job_application.application.Application;
 import com.cristeabianca.job_application.application.ApplicationRepository;
 import com.cristeabianca.job_application.interview.*;
+import jakarta.persistence.Column;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,8 +57,12 @@ public class InterviewServiceImpl implements InterviewService {
         if (app != null) {
             interview.setApplication(app);
 
-               if (interview.getScheduledAt() == null) {
-                interview.setScheduledAt(java.time.LocalDate.now().plusDays(5));
+             if (interview.getScheduledAt() == null) {
+                interview.setScheduledAt(java.time.LocalDateTime.now().plusDays(5));
+            }
+
+             if (interview.getLocation() == null || interview.getLocation().trim().isEmpty()) {
+                interview.setLocation("Not specified");
             }
 
             interviewRepository.save(interview);
@@ -63,7 +70,6 @@ public class InterviewServiceImpl implements InterviewService {
         }
         return false;
     }
-
 
     @Override
     public boolean updateInterview(Long id, Interview updated) {
@@ -79,10 +85,46 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     public boolean deleteInterview(Long id) {
-        if (interviewRepository.existsById(id)) {
+        Optional<Interview> interviewOpt = interviewRepository.findById(id);
+        if (interviewOpt.isPresent()) {
             interviewRepository.deleteById(id);
+            System.out.println("Deleted interview with id: " + id);
             return true;
+        } else {
+            System.out.println("Interview with id " + id + " not found!");
+            return false;
         }
-        return false;
     }
+
+    @Override
+    public List<InterviewDTO> getAllInterviewsDTO() {
+        List<Interview> interviews = interviewRepository.findAll();
+        return interviews.stream().map(interview -> {
+            String candidateName = null;
+            String companyName = null;
+
+            if (interview.getApplication() != null) {
+                if (interview.getApplication().getUser() != null) {
+                    candidateName = interview.getApplication().getUser().getUsername();
+                }
+                if (interview.getApplication().getJob() != null &&
+                        interview.getApplication().getJob().getCompany() != null) {
+                    companyName = interview.getApplication().getJob().getCompany().getName();
+                }
+            }
+
+            return new InterviewDTO(
+                    interview.getId(),
+                    interview.getScheduledAt(),
+                    interview.getLocation(),
+                    candidateName,
+                    companyName
+            );
+        }).toList();
+    }
+
+
+
+
+
 }
