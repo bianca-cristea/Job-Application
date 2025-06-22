@@ -1,18 +1,19 @@
 package com.cristeabianca.job_application.interview;
 
-import java.time.LocalDateTime;
+import com.cristeabianca.job_application.job.Job;
 
+import java.time.LocalDateTime;
 public class InterviewDTO {
     private Long id;
     private LocalDateTime scheduledAt;
-    private String location;
+    private String jobTitle;
     private String candidateName;
     private String companyName;
 
-    public InterviewDTO(Long id, LocalDateTime scheduledAt, String location, String candidateName, String companyName) {
+    public InterviewDTO(Long id, LocalDateTime scheduledAt, String jobTitle, String candidateName, String companyName) {
         this.id = id;
         this.scheduledAt = scheduledAt;
-        this.location = location;
+        this.jobTitle = jobTitle;
         this.candidateName = candidateName;
         this.companyName = companyName;
     }
@@ -33,12 +34,12 @@ public class InterviewDTO {
         this.scheduledAt = scheduledAt;
     }
 
-    public String getLocation() {
-        return location;
+    public String getJobTitle() {
+        return jobTitle;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setJobTitle(String jobTitle) {
+        this.jobTitle = jobTitle;
     }
 
     public String getCandidateName() {

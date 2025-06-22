@@ -114,8 +114,9 @@ export default function UserPage() {
   return (
     <div style={{ padding: '1rem' }}>
       <h2>User Management</h2>
-      <form onSubmit={handleCreateOrUpdate}>
+      <form className="form" onSubmit={handleCreateOrUpdate}>
         <input
+          className="input"
           type="text"
           placeholder="Username"
           value={username}
@@ -124,6 +125,7 @@ export default function UserPage() {
           disabled={loading}
         />
         <input
+          className="input"
           type="password"
           placeholder="Password"
           value={password}
@@ -132,6 +134,7 @@ export default function UserPage() {
           disabled={loading}
         />
         <select
+          className="select"
           multiple
           value={selectedRoles}
           size={2}
@@ -144,11 +147,12 @@ export default function UserPage() {
             <option key={r.id} value={r.id}>{r.name}</option>
           ))}
         </select>
-        <button type="submit" disabled={loading}>
+        <button className="button" type="submit" disabled={loading}>
           {loading ? (editId ? 'Updating...' : 'Creating...') : (editId ? 'Update' : 'Create')}
         </button>
         {editId && (
           <button
+            className="button"
             type="button"
             onClick={() => {
               setEditId(null);
@@ -164,6 +168,7 @@ export default function UserPage() {
           </button>
         )}
       </form>
+
 
       {errorMsg && (
         <div style={{ color: 'red', marginTop: '0.5rem' }}>

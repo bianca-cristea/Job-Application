@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,10 +40,17 @@ public class InterviewController {
 
     @PostMapping("/application/{applicationId}")
     public ResponseEntity<String> create(@PathVariable Long applicationId, @RequestBody Interview interview) {
+
+        if (interview.getScheduledAt() == null) {
+            return new ResponseEntity<>("Scheduled date must be provided by admin", HttpStatus.BAD_REQUEST);
+        }
+
         boolean result = interviewService.createInterview(applicationId, interview);
-        return result ? new ResponseEntity<>("Interview created", HttpStatus.CREATED) :
-                new ResponseEntity<>("Failed", HttpStatus.BAD_REQUEST);
+        return result
+                ? new ResponseEntity<>("Interview created", HttpStatus.CREATED)
+                : new ResponseEntity<>("Failed", HttpStatus.BAD_REQUEST);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInterview(@PathVariable Long id) {
@@ -74,16 +82,17 @@ public class InterviewController {
         if (optionalInterview.isEmpty()) {
             return new ResponseEntity<>("Interview not found", HttpStatus.NOT_FOUND);
         }
-        if (updatedInterview.getLocation() == null || updatedInterview.getScheduledAt() == null) {
-            return new ResponseEntity<>("Invalid interview data", HttpStatus.BAD_REQUEST);
+        if (updatedInterview.getScheduledAt() == null) {
+            return new ResponseEntity<>("Scheduled date must be provided", HttpStatus.BAD_REQUEST);
         }
         Interview interview = optionalInterview.get();
         interview.setScheduledAt(updatedInterview.getScheduledAt());
-        interview.setLocation(updatedInterview.getLocation());
+        if (updatedInterview.getJob() != null) {
+            interview.setJob(updatedInterview.getJob());
+        }
         interviewRepository.save(interview);
         return new ResponseEntity<>("Interview updated", HttpStatus.OK);
     }
-
 
     @GetMapping("/user")
     public ResponseEntity<List<Interview>> getUserInterviews(@AuthenticationPrincipal UserDetails userDetails) {

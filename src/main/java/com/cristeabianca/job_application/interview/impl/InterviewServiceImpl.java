@@ -3,7 +3,7 @@ package com.cristeabianca.job_application.interview.impl;
 import com.cristeabianca.job_application.application.Application;
 import com.cristeabianca.job_application.application.ApplicationRepository;
 import com.cristeabianca.job_application.interview.*;
-import jakarta.persistence.Column;
+import com.cristeabianca.job_application.job.Job;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +22,7 @@ public class InterviewServiceImpl implements InterviewService {
         this.interviewRepository = interviewRepository;
         this.applicationRepository = applicationRepository;
     }
+
     @Override
     public Map<String, List<Interview>> getAllGroupedByCompany() {
         List<Interview> all = interviewRepository.findAll();
@@ -57,13 +58,8 @@ public class InterviewServiceImpl implements InterviewService {
         if (app != null) {
             interview.setApplication(app);
 
-             if (interview.getScheduledAt() == null) {
-                interview.setScheduledAt(java.time.LocalDateTime.now().plusDays(5));
-            }
-
-             if (interview.getLocation() == null || interview.getLocation().trim().isEmpty()) {
-                interview.setLocation("Not specified");
-            }
+            Job job = app.getJob();
+            interview.setJob(job);
 
             interviewRepository.save(interview);
             return true;
@@ -75,7 +71,7 @@ public class InterviewServiceImpl implements InterviewService {
     public boolean updateInterview(Long id, Interview updated) {
         Interview existing = interviewRepository.findById(id).orElse(null);
         if (existing != null) {
-            existing.setLocation(updated.getLocation());
+            existing.setJob(updated.getJob());
             existing.setScheduledAt(updated.getScheduledAt());
             interviewRepository.save(existing);
             return true;
@@ -83,48 +79,49 @@ public class InterviewServiceImpl implements InterviewService {
         return false;
     }
 
+
     @Override
     public boolean deleteInterview(Long id) {
         Optional<Interview> interviewOpt = interviewRepository.findById(id);
         if (interviewOpt.isPresent()) {
+            Interview interview = interviewOpt.get();
+            Application application = interview.getApplication();
+            if (application != null) {
+                application.setInterview(null);
+            }
             interviewRepository.deleteById(id);
-            System.out.println("Deleted interview with id: " + id);
             return true;
-        } else {
-            System.out.println("Interview with id " + id + " not found!");
-            return false;
         }
+        return false;
     }
-
     @Override
     public List<InterviewDTO> getAllInterviewsDTO() {
         List<Interview> interviews = interviewRepository.findAll();
         return interviews.stream().map(interview -> {
             String candidateName = null;
             String companyName = null;
+            String jobTitle = null;
 
             if (interview.getApplication() != null) {
                 if (interview.getApplication().getUser() != null) {
                     candidateName = interview.getApplication().getUser().getUsername();
                 }
-                if (interview.getApplication().getJob() != null &&
-                        interview.getApplication().getJob().getCompany() != null) {
-                    companyName = interview.getApplication().getJob().getCompany().getName();
+                if (interview.getApplication().getJob() != null) {
+                    jobTitle = interview.getApplication().getJob().getTitle();
+                    if (interview.getApplication().getJob().getCompany() != null) {
+                        companyName = interview.getApplication().getJob().getCompany().getName();
+                    }
                 }
             }
 
             return new InterviewDTO(
                     interview.getId(),
                     interview.getScheduledAt(),
-                    interview.getLocation(),
+                    jobTitle,
                     candidateName,
                     companyName
             );
         }).toList();
     }
-
-
-
-
 
 }

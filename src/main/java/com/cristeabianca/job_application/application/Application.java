@@ -28,9 +28,10 @@ public class Application {
     @JoinColumn(name = "job_id")
     private Job job;
 
+    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL)
     private Interview interview;
+
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
