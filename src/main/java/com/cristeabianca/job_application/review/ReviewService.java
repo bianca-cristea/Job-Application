@@ -5,8 +5,16 @@ import java.util.List;
 public interface ReviewService {
 
     List<Review> getAllReviews(Long companyId);
-    boolean addReview(Review review, Long companyId);
-    Review getReview(Long reviewId, Long companyId);
-    boolean updateReview(Long companyId,Long reviewId, Review updatedReview);
-    boolean deleteReview(Long companyId,Long reviewId);
+
+    List<Review> getAllReviews();
+
+    boolean addReview(Review review, Long companyId, String username);
+
+    Review getReviewById(Long reviewId);
+
+    boolean updateReview(Long companyId, Long reviewId, String username, Review updatedReview);
+
+    boolean deleteReview(Long reviewId, String username);
+
+    Review getReview(Long companyId, Long reviewId);
 }

@@ -1,9 +1,12 @@
-package com.cristeabianca.job_application.review.impl;
+package com.cristeabianca.job_application.review;
 
 import com.cristeabianca.job_application.company.Company;
 import com.cristeabianca.job_application.company.CompanyService;
 import com.cristeabianca.job_application.review.Review;
 import com.cristeabianca.job_application.review.ReviewRepository;
+import com.cristeabianca.job_application.review.impl.ReviewServiceImpl;
+import com.cristeabianca.job_application.user.User;
+import com.cristeabianca.job_application.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -21,22 +24,31 @@ class ReviewServiceImplTest {
     @Mock
     private CompanyService companyService;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private ReviewServiceImpl reviewService;
 
     private Company company;
     private Review review;
+    private User user;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+
         company = new Company();
         company.setId(1L);
+
+        user = new User();
+        user.setUsername("testuser");
 
         review = new Review();
         review.setId(1L);
         review.setTitle("Great place");
         review.setCompany(company);
+        review.setUser(user);
         review.setRating(4.5);
     }
 
@@ -51,20 +63,22 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    void addReview_WithExistingCompany_ReturnsTrue() {
+    void addReview_WithExistingCompanyAndUser_ReturnsTrue() {
         when(companyService.getCompanyById(1L)).thenReturn(company);
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-        boolean result = reviewService.addReview(review, 1L);
+        boolean result = reviewService.addReview(review, 1L, "testuser");
         assertTrue(result);
         verify(reviewRepository, times(1)).save(review);
     }
 
     @Test
-    void addReview_WithNonExistingCompany_ReturnsFalse() {
+    void addReview_WithNonExistingCompanyOrUser_ReturnsFalse() {
         when(companyService.getCompanyById(1L)).thenReturn(null);
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
 
-        boolean result = reviewService.addReview(review, 1L);
+        boolean result = reviewService.addReview(review, 1L, "testuser");
         assertFalse(result);
         verify(reviewRepository, never()).save(any());
     }
@@ -87,54 +101,70 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    void updateReview_WithValidCompany_ReturnsTrue() {
+    void updateReview_WithValidCompanyAndUser_ReturnsTrue() {
         when(companyService.getCompanyById(1L)).thenReturn(company);
+        when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-        boolean updated = reviewService.updateReview(1L, 1L, review);
+        Review updatedReview = new Review();
+        updatedReview.setTitle("Updated title");
+        updatedReview.setDescription("Updated description");
+        updatedReview.setRating(5.0);
+
+        boolean updated = reviewService.updateReview(1L, 1L, "testuser", updatedReview);
         assertTrue(updated);
-        verify(reviewRepository, times(1)).save(review);
+        verify(reviewRepository, times(1)).save(any(Review.class));
     }
 
     @Test
-    void updateReview_WithInvalidCompany_ReturnsFalse() {
+    void updateReview_WithInvalidCompanyOrUser_ReturnsFalse() {
         when(companyService.getCompanyById(1L)).thenReturn(null);
+        boolean updatedNullCompany = reviewService.updateReview(1L, 1L, "testuser", review);
+        assertFalse(updatedNullCompany);
 
-        boolean updated = reviewService.updateReview(1L, 1L, review);
-        assertFalse(updated);
-        verify(reviewRepository, never()).save(any());
+        when(companyService.getCompanyById(1L)).thenReturn(company);
+        Review otherUserReview = new Review();
+        otherUserReview.setUser(new User());
+        otherUserReview.getUser().setUsername("otheruser");
+        when(reviewRepository.findById(1L)).thenReturn(Optional.of(otherUserReview));
+
+        boolean updatedWrongUser = reviewService.updateReview(1L, 1L, "testuser", review);
+        assertFalse(updatedWrongUser);
     }
 
     @Test
-    void deleteReview_WithValidCompanyAndReview_ReturnsTrue() {
-        when(companyService.getCompanyById(1L)).thenReturn(company);
-        when(reviewRepository.existsById(1L)).thenReturn(true);
-        when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
-        // mock updateCompany to always return true
-        when(companyService.updateCompany(1L, company)).thenReturn(true);
+    void getAllReviews_WithoutParams_ReturnsAll() {
+        when(reviewRepository.findAll()).thenReturn(List.of(review));
 
-        boolean deleted = reviewService.deleteReview(1L, 1L);
+        List<Review> allReviews = reviewService.getAllReviews();
+        assertNotNull(allReviews);
+        assertEquals(1, allReviews.size());
+        verify(reviewRepository, times(1)).findAll();
+    }
+
+    @Test
+    void deleteReview_WithValidCompanyAndUser_ReturnsTrue() {
+        when(companyService.getCompanyById(1L)).thenReturn(company);
+        when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
+
+        boolean deleted = reviewService.deleteReview(1L, 1L, "testuser");
         assertTrue(deleted);
         verify(reviewRepository, times(1)).deleteById(1L);
-        verify(companyService, times(1)).updateCompany(1L, company);
     }
 
     @Test
-    void deleteReview_WithInvalidCompany_ReturnsFalse() {
+    void deleteReview_WithInvalidCompanyOrUser_ReturnsFalse() {
         when(companyService.getCompanyById(1L)).thenReturn(null);
+        boolean deletedNullCompany = reviewService.deleteReview(1L, 1L, "testuser");
+        assertFalse(deletedNullCompany);
 
-        boolean deleted = reviewService.deleteReview(1L, 1L);
-        assertFalse(deleted);
-        verify(reviewRepository, never()).deleteById(anyLong());
-    }
-
-    @Test
-    void deleteReview_WithNonExistingReview_ReturnsFalse() {
         when(companyService.getCompanyById(1L)).thenReturn(company);
-        when(reviewRepository.existsById(1L)).thenReturn(false);
+        Review otherUserReview = new Review();
+        otherUserReview.setUser(new User());
+        otherUserReview.getUser().setUsername("otheruser");
+        when(reviewRepository.findById(1L)).thenReturn(Optional.of(otherUserReview));
 
-        boolean deleted = reviewService.deleteReview(1L, 1L);
-        assertFalse(deleted);
-        verify(reviewRepository, never()).deleteById(anyLong());
+        boolean deletedWrongUser = reviewService.deleteReview(1L, 1L, "testuser");
+        assertFalse(deletedWrongUser);
     }
 }

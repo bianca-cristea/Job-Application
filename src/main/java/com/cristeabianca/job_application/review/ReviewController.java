@@ -1,57 +1,99 @@
 package com.cristeabianca.job_application.review;
 
-import com.cristeabianca.job_application.company.Company;
+import com.cristeabianca.job_application.review.Review;
+import com.cristeabianca.job_application.review.ReviewService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/companies/{companyId}")
+@RequestMapping("/companies")
 public class ReviewController {
 
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
 
     public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
     }
 
-    @GetMapping("/reviews")
+    @GetMapping("/{companyId}/reviews")
     public ResponseEntity<List<Review>> getAllReviews(@PathVariable Long companyId) {
-        return new ResponseEntity<>(reviewService.getAllReviews(companyId), HttpStatus.OK);
+        List<Review> reviews = reviewService.getAllReviews(companyId);
+        return ResponseEntity.ok(reviews);
     }
 
-    @PostMapping("/reviews")
-    public ResponseEntity<String> addReview(@PathVariable Long companyId, @RequestBody Review review) {
-        boolean response = reviewService.addReview(review, companyId);
-        if (response) {
-            return new ResponseEntity<>("Review added successfully", HttpStatus.OK);
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<Review>> getAllReviewsAdmin(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null || userDetails.getAuthorities().stream()
+                .noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<Review> reviews = reviewService.getAllReviews();
+        return ResponseEntity.ok(reviews);
+    }
+
+    @PostMapping("/{companyId}/reviews")
+    public ResponseEntity<String> addReview(@PathVariable Long companyId,
+                                            @RequestBody Review review,
+                                            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        boolean success = reviewService.addReview(review, companyId, userDetails.getUsername());
+        if (success) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Review added successfully");
         } else {
-            return new ResponseEntity<>("Review could not be added.", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Review could not be added");
         }
     }
-    @GetMapping("/reviews/{reviewId}")
-    public ResponseEntity<Review> getReview(@PathVariable Long companyId, @PathVariable Long reviewId){
-       return new ResponseEntity<>(reviewService.getReview(companyId,reviewId),HttpStatus.OK);
-    }
-    @PutMapping("/reviews/{reviewId}")
-    public ResponseEntity<String> updateReview(@PathVariable Long companyId,@PathVariable Long reviewId,@RequestBody Review updatedReview){
-        boolean response = reviewService.updateReview(reviewId, companyId,updatedReview);
-        if (response) {
-            return new ResponseEntity<>("Review updated successfully", HttpStatus.OK);
+
+    @GetMapping("/{companyId}/reviews/{reviewId}")
+    public ResponseEntity<Review> getReview(@PathVariable Long companyId,
+                                            @PathVariable Long reviewId) {
+        Review review = reviewService.getReview(companyId, reviewId);
+        if (review != null) {
+            return ResponseEntity.ok(review);
         } else {
-            return new ResponseEntity<>("Review could not be updated.", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-    @DeleteMapping("/reviews/{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable Long companyId,@PathVariable Long reviewId){
-        boolean response = reviewService.deleteReview(reviewId, companyId);
-        if (response) {
-            return new ResponseEntity<>("Review deleted successfully", HttpStatus.OK);
+
+    @PutMapping("/{companyId}/reviews/{reviewId}")
+    public ResponseEntity<String> updateReview(
+            @PathVariable Long companyId,
+            @PathVariable Long reviewId,
+            @RequestBody Review updatedReview,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+
+        boolean success = reviewService.updateReview(companyId, reviewId, userDetails.getUsername(), updatedReview);
+        if (success) {
+            return ResponseEntity.ok("Review updated successfully");
         } else {
-            return new ResponseEntity<>("Review could not be deleted.", HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Review could not be updated");
+        }
+    }
+
+    @DeleteMapping("/{companyId}/reviews/{reviewId}")
+    public ResponseEntity<String> deleteReview(@PathVariable Long companyId,
+                                               @PathVariable Long reviewId,
+                                               @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+        boolean success = reviewService.deleteReview(reviewId, userDetails.getUsername());
+        if (success) {
+            return ResponseEntity.ok("Review deleted successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Review could not be deleted");
         }
     }
 }

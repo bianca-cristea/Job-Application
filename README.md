@@ -1,59 +1,68 @@
-# Job Application
+# Job Application Platform
 
-Java Spring Boot Project
+O aplicație completă de tip CRUD pentru gestiunea aplicațiilor de angajare, cu backend în **Spring Boot** și frontend în **React.js**.  
+Include gestiune pentru: aplicații, companii, joburi, interviuri, recenzii, utilizatori și roluri.
 
-## Functinalities
+---
 
-- CRUD Operations
-- 
+## Tehnologii folosite
 
-### Endpoints for jobs
-GET /jobs -> get all jobs 
+### Backend (Spring Boot)
+- Spring Web
+- Spring Data JPA
+- Spring Security
+- Hibernate
+- PostgreSQL
 
-GET /jobs/{id} -> get a specific job by id
+### Frontend (React)
+- React 18+
+- React Router DOM
+- Fetch API
+- CSS simplu
+---
+## Cum rulezi proiectul
 
-POST /jobs-> create a new job
+### 1. Rulează backend-ul
 
-DELETE /jobs/{id} -> delete a specific job by id
+Asigură-te că ai PostgreSQL instalat și creează o bază de date `job_application`.
 
-PUT /jobs/{id} -> edit a job
+Apoi în `application.properties` (sau `application.yml`) configurează:
+spring.datasource.url=jdbc:postgresql://localhost:5432/job_application
+spring.datasource.username=postgres
+spring.datasource.password=parola_ta
+spring.jpa.hibernate.ddl-auto=update
 
-GET /jobs/{id}/company -> get the company associated with a specific job by id
+Pornește aplicația Spring Boot
+Accesibil la: http://localhost:8080
 
-### Endpoints for company
-GET /companies -> get all companies
+Deschide un terminal în frontend/job-application-ui/ și rulează:
+npm install
+npm run dev
+Accesibil la: http://localhost:5173
 
-PUT /companies/{id} -> update company by id
+Funcționalități implementate CRUD complet pentru:
 
-POST /companies -> create company
+- Aplicări la joburi
 
-DELETE /companies/{id} -> delete a company
+- Companii
 
-GET /companies/{id} -> get a company by id
+- Interviuri
 
-### Endpoints for review
-GET /companies/{companyId}/reviews
+- Joburi
 
-POST /companies/{companyId}/reviews
+- Recenzii
 
-GET /companies/{companyId}/reviews/{reviewId}
+- Roluri
 
-PUT /companies/{companyId}/reviews/{reviewId}
+- Utilizatori
 
-DELETE /companies/{companyId}/reviews/{reviewId}
+Spring Security cu roluri: USER, ADMIN
 
-### Endpoints for role
-GET /roles -> get all roles
+API REST complet
 
-PUT /roles/{id} -> update company by id
+Interfață modernă în React
 
-POST /roles -> create company
-
-DELETE /roles/{id} -> delete a company
-
-GET /roles/{id} -> get a company by id
-
-## Author
-Cristea Bianca-Stefania
-
-
+Autor
+Bianca Cristea
+Master Inginerie Software , UniBuc
+2025

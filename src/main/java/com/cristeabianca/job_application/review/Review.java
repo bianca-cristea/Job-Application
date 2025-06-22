@@ -3,6 +3,7 @@ package com.cristeabianca.job_application.review;
 import com.cristeabianca.job_application.company.Company;
 import com.cristeabianca.job_application.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
@@ -17,7 +18,7 @@ public class Review {
 
 
     @ManyToOne
-    @JsonIgnore
+    @JsonIgnoreProperties({"reviews", "jobs"})
     private Company company;
 
     @ManyToOne
@@ -60,6 +61,14 @@ public class Review {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public double getRating() {

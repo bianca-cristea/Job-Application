@@ -6,6 +6,8 @@ import com.cristeabianca.job_application.interview.Interview;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "application")
 public class Application {
@@ -17,17 +19,22 @@ public class Application {
     private String status;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "job_id")
     private Job job;
 
+    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL)
     private Interview interview;
+
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     public Application() {
     }
@@ -38,6 +45,14 @@ public class Application {
         this.user = user;
         this.job = job;
         this.interview = interview;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
