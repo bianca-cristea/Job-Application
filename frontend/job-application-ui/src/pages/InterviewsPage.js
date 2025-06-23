@@ -9,12 +9,18 @@ export default function InterviewsPage() {
   const [editingInterview, setEditingInterview] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-    setIsAdmin(userInfo.role === "ADMIN");
+useEffect(() => {
+  const token = localStorage.getItem("token");
 
-    fetchInterviews();
-  }, []);
+  if (token) {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const roles = payload.roles || [];
+    setIsAdmin(roles.includes("ROLE_ADMIN"));
+  }
+
+  fetchInterviews();
+}, []);
+
 
   async function fetchInterviews() {
     setLoading(true);
