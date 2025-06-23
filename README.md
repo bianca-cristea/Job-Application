@@ -1,19 +1,3 @@
-# Job Application Platform
-
-O aplicație completă de tip CRUD pentru gestiunea aplicațiilor de angajare, cu backend în **Spring Boot** și frontend în **React.js**.  
-Include gestiune pentru: aplicații, companii, joburi, interviuri, recenzii, utilizatori și roluri.
-
----
-
-## Tehnologii folosite
-
-### Backend (Spring Boot)
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- Hibernate
-- PostgreSQL
-
 ### Frontend (React)
 - React 18+
 - React Router DOM
