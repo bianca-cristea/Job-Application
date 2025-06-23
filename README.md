@@ -1,38 +1,52 @@
-# Job Application
+### Frontend (React)
+- React 18+
+- React Router DOM
+- Fetch API
+- CSS simplu
+---
+## Cum rulezi proiectul
 
-Aplicație web realizată în Java (Spring Boot) și React, pentru disciplina **Aplicații Web pentru Baze de Date** – Master, Anul I (2025).
+### 1. Rulează backend-ul
 
-## Autor
-Cristea Bianca-Ștefania
+Asigură-te că ai PostgreSQL instalat și creează o bază de date `job_application`.
 
-## Tehnologii folosite
-- Java 21, Spring Boot, Spring Data JPA, Spring Security
-- PostgreSQL (runtime)
-- H2 (testare/profil alternativ)
-- React
-- JUnit 5 (testare de integrare)
-- Spring Profiles (dev/test), logging
+Apoi în `application.properties` (sau `application.yml`) configurează:
+spring.datasource.url=jdbc:postgresql://localhost:5432/job_application
+spring.datasource.username=postgres
+spring.datasource.password=parola_ta
+spring.jpa.hibernate.ddl-auto=update
 
-## Funcționalități cheie
-- CRUD complet pentru toate entitățile
-- Relații JPA: OneToOne, OneToMany, ManyToOne, ManyToMany
-- Validări, tratarea excepțiilor
-- Autentificare cu Spring Security (JDBC)
-- Paginare și sortare
-- Testare unitară și integrată
-- Profiluri multiple pentru baze de date
+Pornește aplicația Spring Boot
+Accesibil la: http://localhost:8080
 
-## Structura
-- `backend/` – Spring Boot
-- `frontend/` – React
-
-## Rulare rapidă
-# Backend 
-./mvnw spring-boot:run
-
-# Frontend
-cd frontend
+Deschide un terminal în frontend/job-application-ui/ și rulează:
 npm install
-npm start
+npm run dev
+Accesibil la: http://localhost:5173
 
+Funcționalități implementate CRUD complet pentru:
 
+- Aplicări la joburi
+
+- Companii
+
+- Interviuri
+
+- Joburi
+
+- Recenzii
+
+- Roluri
+
+- Utilizatori
+
+Spring Security cu roluri: USER, ADMIN
+
+API REST complet
+
+Interfață modernă în React
+
+Autor
+Bianca Cristea
+Master Inginerie Software , UniBuc
+2025
