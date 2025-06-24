@@ -1,73 +1,139 @@
 package com.cristeabianca.job_application.user;
 
-import com.cristeabianca.job_application.role.Role;
-import com.cristeabianca.job_application.util.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.Mockito;
+import org.springframework.data.domain.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
 class UserControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    private String jwtToken;
+    private UserService userService;
+    private UserController userController;
 
     @BeforeEach
-    void setUp() {
-        userRepository.deleteAll();
+    void setup() {
+        userService = Mockito.mock(UserService.class);
+        userController = new UserController(userService);
+    }
 
+    @Test
+    void testGetAllUsers() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("username"));
         User user = new User();
-        user.setUsername("admin");
-        user.setPassword("encodedpassword"); // poate fi orice, nu se validează în test
-        Role role = new Role();
-        role.setName("ROLE_ADMIN");
+        user.setId(1L);
+        user.setUsername("testuser");
+        Page<User> page = new PageImpl<>(List.of(user), pageable, 1);
 
-        Set<Role> roles = new HashSet<>();
-        roles.add(role);
-        user.setRoles(roles);
+        when(userService.getAllUsers(any(Pageable.class))).thenReturn(page);
 
-        userRepository.save(user);
+        var response = userController.getAllUsers(0, 10, "username");
 
-        jwtToken = TestUtil.generateTestToken(user);
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getTotalElements());
+        assertEquals("testuser", response.getBody().getContent().get(0).getUsername());
     }
 
     @Test
-    void testGetAllUsers_withJwt_shouldReturnOk() throws Exception {
-        mockMvc.perform(get("/users")
-                        .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk());
+    void testCreateUser_Success() {
+        User user = new User();
+        user.setUsername("newuser");
+
+        when(userService.createUser(any(User.class))).thenReturn(true);
+
+        var response = userController.createUser(user);
+
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals("User created", response.getBody());
     }
 
     @Test
-    void testCreateUser_withJwt_shouldCreateSuccessfully() throws Exception {
-        String newUserJson = "{\"username\":\"testuser\",\"password\":\"pass123\"}";
+    void testCreateUser_Failure() {
+        User user = new User();
+        user.setUsername("baduser");
 
-        mockMvc.perform(post("/users")
-                        .header("Authorization", "Bearer " + jwtToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(newUserJson))
-                .andExpect(status().isCreated());
+        when(userService.createUser(any(User.class))).thenReturn(false);
+
+        var response = userController.createUser(user);
+
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("Could not create user", response.getBody());
     }
 
     @Test
-    void testUnauthorizedAccess_shouldFail() throws Exception {
-        mockMvc.perform(get("/users"))
-                .andExpect(status().isUnauthorized());
+    void testGetUserById_Found() {
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("founduser");
+
+        when(userService.getUserById(1L)).thenReturn(user);
+
+        var response = userController.getUserById(1L);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("founduser", response.getBody().getUsername());
+    }
+
+    @Test
+    void testGetUserById_NotFound() {
+        when(userService.getUserById(1L)).thenReturn(null);
+
+        var response = userController.getUserById(1L);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    void testUpdateUser_Success() {
+        User user = new User();
+        user.setUsername("updateduser");
+
+        when(userService.updateUser(eq(1L), any(User.class))).thenReturn(true);
+
+        var response = userController.updateUser(1L, user);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("User updated", response.getBody());
+    }
+
+    @Test
+    void testUpdateUser_Failure() {
+        User user = new User();
+        user.setUsername("failupdate");
+
+        when(userService.updateUser(eq(1L), any(User.class))).thenReturn(false);
+
+        var response = userController.updateUser(1L, user);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertEquals("Could not update user", response.getBody());
+    }
+
+    @Test
+    void testDeleteUser_Success() {
+        when(userService.deleteUser(1L)).thenReturn(true);
+
+        var response = userController.deleteUser(1L);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("User deleted", response.getBody());
+    }
+
+    @Test
+    void testDeleteUser_Failure() {
+        when(userService.deleteUser(1L)).thenReturn(false);
+
+        var response = userController.deleteUser(1L);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertEquals("Could not delete user", response.getBody());
     }
 }

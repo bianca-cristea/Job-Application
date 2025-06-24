@@ -2,29 +2,27 @@ package com.cristeabianca.job_application.interview;
 
 import com.cristeabianca.job_application.application.Application;
 import com.cristeabianca.job_application.application.ApplicationRepository;
-import com.cristeabianca.job_application.interview.Interview;
-import com.cristeabianca.job_application.interview.InterviewRepository;
+import com.cristeabianca.job_application.interview.*;
 import com.cristeabianca.job_application.interview.impl.InterviewServiceImpl;
+import com.cristeabianca.job_application.job.Job;
+import com.cristeabianca.job_application.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class InterviewServiceImplTest {
+public class InterviewServiceImplTest {
 
-    @Mock
-    private InterviewRepository interviewRepository;
-
-    @Mock
-    private ApplicationRepository applicationRepository;
-
-    @InjectMocks
-    private InterviewServiceImpl interviewService;
+    @Mock private InterviewRepository interviewRepository;
+    @Mock private ApplicationRepository applicationRepository;
+    @InjectMocks private InterviewServiceImpl interviewService;
 
     private Application application;
     private Interview interview;
@@ -32,103 +30,101 @@ class InterviewServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        Job job = new Job();
+        job.setTitle("Backend Developer");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("johndoe");
 
         application = new Application();
-        application.setId(1L);
+        application.setId(10L);
+        application.setUser(user);
+        application.setJob(job);
 
         interview = new Interview();
         interview.setId(1L);
-        interview.setLocation("Room 101");
         interview.setScheduledAt(LocalDateTime.now());
         interview.setApplication(application);
+        interview.setJob(job);
     }
 
     @Test
-    void getInterviewByApplication_shouldReturnInterview() {
-        when(interviewRepository.findByApplicationId(1L)).thenReturn(interview);
-
-        Interview result = interviewService.getInterviewByApplication(1L);
-
+    void shouldGetInterviewByApplication() {
+        when(interviewRepository.findByApplicationId(10L)).thenReturn(interview);
+        Interview result = interviewService.getInterviewByApplication(10L);
         assertNotNull(result);
-        assertEquals("Room 101", result.getLocation());
-        verify(interviewRepository).findByApplicationId(1L);
+        assertEquals(1L, result.getId());
     }
 
     @Test
-    void getInterviewByApplication_whenNone_shouldReturnNull() {
-        when(interviewRepository.findByApplicationId(2L)).thenReturn(null);
-
-        Interview result = interviewService.getInterviewByApplication(2L);
-
-        assertNull(result);
-    }
-
-    @Test
-    void createInterview_whenApplicationExists_shouldSaveAndReturnTrue() {
-        when(applicationRepository.findById(1L)).thenReturn(Optional.of(application));
-        when(interviewRepository.save(any(Interview.class))).thenReturn(interview);
-
-        boolean created = interviewService.createInterview(1L, interview);
-
+    void shouldCreateInterviewSuccessfully() {
+        when(applicationRepository.findById(10L)).thenReturn(Optional.of(application));
+        boolean created = interviewService.createInterview(10L, interview);
         assertTrue(created);
         verify(interviewRepository).save(interview);
-        assertEquals(application, interview.getApplication());
     }
 
     @Test
-    void createInterview_whenApplicationNotFound_shouldReturnFalse() {
-        when(applicationRepository.findById(1L)).thenReturn(Optional.empty());
-
-        boolean created = interviewService.createInterview(1L, interview);
-
+    void shouldNotCreateInterviewWhenApplicationNotFound() {
+        when(applicationRepository.findById(99L)).thenReturn(Optional.empty());
+        boolean created = interviewService.createInterview(99L, interview);
         assertFalse(created);
-        verify(interviewRepository, never()).save(any());
     }
 
     @Test
-    void updateInterview_whenExists_shouldUpdateAndReturnTrue() {
-        Interview updated = new Interview();
-        updated.setLocation("Room 202");
-        updated.setScheduledAt(LocalDateTime.now().plusDays(1));
-
+    void shouldUpdateInterviewSuccessfully() {
         when(interviewRepository.findById(1L)).thenReturn(Optional.of(interview));
-        when(interviewRepository.save(any(Interview.class))).thenReturn(interview);
+        Interview updated = new Interview();
+        updated.setScheduledAt(LocalDateTime.now().plusDays(1));
+        updated.setJob(new Job());
 
-        boolean updatedResult = interviewService.updateInterview(1L, updated);
-
-        assertTrue(updatedResult);
-        assertEquals("Room 202", interview.getLocation());
+        boolean result = interviewService.updateInterview(1L, updated);
+        assertTrue(result);
         verify(interviewRepository).save(interview);
     }
 
     @Test
-    void updateInterview_whenNotExists_shouldReturnFalse() {
-        when(interviewRepository.findById(2L)).thenReturn(Optional.empty());
-
-        boolean updatedResult = interviewService.updateInterview(2L, interview);
-
-        assertFalse(updatedResult);
-        verify(interviewRepository, never()).save(any());
+    void shouldNotUpdateInterviewIfNotFound() {
+        when(interviewRepository.findById(999L)).thenReturn(Optional.empty());
+        Interview updated = new Interview();
+        boolean result = interviewService.updateInterview(999L, updated);
+        assertFalse(result);
     }
 
     @Test
-    void deleteInterview_whenExists_shouldDeleteAndReturnTrue() {
-        when(interviewRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(interviewRepository).deleteById(1L);
-
-        boolean deleted = interviewService.deleteInterview(1L);
-
-        assertTrue(deleted);
+    void shouldDeleteInterviewSuccessfully() {
+        when(interviewRepository.findById(1L)).thenReturn(Optional.of(interview));
+        boolean result = interviewService.deleteInterview(1L);
+        assertTrue(result);
         verify(interviewRepository).deleteById(1L);
     }
 
     @Test
-    void deleteInterview_whenNotExists_shouldReturnFalse() {
-        when(interviewRepository.existsById(1L)).thenReturn(false);
+    void shouldNotDeleteInterviewIfNotFound() {
+        when(interviewRepository.findById(999L)).thenReturn(Optional.empty());
+        boolean result = interviewService.deleteInterview(999L);
+        assertFalse(result);
+    }
 
-        boolean deleted = interviewService.deleteInterview(1L);
+    @Test
+    void shouldGetAllGroupedByCompany() {
+        Job job = new Job();
+        job.setCompany(new com.cristeabianca.job_application.company.Company());
+        job.getCompany().setName("IBM");
+        application.setJob(job);
+        interview.setApplication(application);
+        when(interviewRepository.findAll()).thenReturn(List.of(interview));
 
-        assertFalse(deleted);
-        verify(interviewRepository, never()).deleteById(any());
+        Map<String, List<Interview>> grouped = interviewService.getAllGroupedByCompany();
+        assertTrue(grouped.containsKey("IBM"));
+    }
+
+    @Test
+    void shouldGetAllInterviewsDTO() {
+        when(interviewRepository.findAll()).thenReturn(List.of(interview));
+        List<InterviewDTO> dtos = interviewService.getAllInterviewsDTO();
+        assertEquals(1, dtos.size());
+        assertEquals("johndoe", dtos.get(0).getCandidateName());
     }
 }

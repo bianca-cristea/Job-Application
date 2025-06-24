@@ -1,69 +1,202 @@
 package com.cristeabianca.job_application.job;
 
-import com.cristeabianca.job_application.company.Company;
-import com.cristeabianca.job_application.company.CompanyRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.cristeabianca.job_application.job.JobService;
+import com.cristeabianca.job_application.user.User;
+import com.cristeabianca.job_application.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class JobControllerIntegrationTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @Autowired
-    private MockMvc mockMvc;
+public class JobControllerIntegrationTest {
 
-    @Autowired
-    private JobRepository jobRepository;
+    @Mock
+    private JobService jobService;
 
-    @Autowired
-    private CompanyRepository companyRepository;
+    @Mock
+    private UserRepository userRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private Company testCompany;
+    @InjectMocks
+    private JobController jobController;
 
     @BeforeEach
     void setUp() {
-        jobRepository.deleteAll();
-        companyRepository.deleteAll();
-
-        testCompany = new Company();
-        testCompany.setName("TestCompany");
-        testCompany.setDescription("IT company");
-        testCompany = companyRepository.save(testCompany);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testCreateAndGetJob() throws Exception {
+    void showAllJobs_returnsJobList() {
+        List<Job> jobs = List.of(new Job(), new Job());
+        when(jobService.showAllJobs()).thenReturn(jobs);
+
+        ResponseEntity<List<Job>> response = jobController.showAllJobs();
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(2, response.getBody().size());
+        verify(jobService).showAllJobs();
+    }
+
+    @Test
+    void createNewJob_success_returnsCreated() {
         Job job = new Job();
-        job.setTitle("Backend Developer");
-        job.setDescription("Spring Boot job");
-        job.setLocation("Remote");
-        job.setMinSalary("3000");
-        job.setMaxSalary("5000");
-        job.setCompany(testCompany);
+        when(jobService.createNewJob(job)).thenReturn(true);
 
-        String jobJson = objectMapper.writeValueAsString(job);
+        ResponseEntity<String> response = jobController.createNewJob(job);
 
-        mockMvc.perform(post("/jobs")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jobJson))
-                .andExpect(status().isCreated());
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals("Job created.", response.getBody());
+        verify(jobService).createNewJob(job);
+    }
 
-        mockMvc.perform(get("/jobs"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].title").value("Backend Developer"));
+    @Test
+    void createNewJob_failure_returnsNotFound() {
+        Job job = new Job();
+        when(jobService.createNewJob(job)).thenReturn(false);
+
+        ResponseEntity<String> response = jobController.createNewJob(job);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertEquals("Job could not be created.", response.getBody());
+        verify(jobService).createNewJob(job);
+    }
+
+    @Test
+    void applyToJob_userFoundAndApplied_returnsCreated() {
+        Long jobId = 1L;
+        String username = "user1";
+        User user = new User();
+
+        Principal principal = () -> username;
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(jobService.applyToJob(jobId, user)).thenReturn(true);
+
+        ResponseEntity<String> response = jobController.applyToJob(jobId, principal);
+
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals("Applied successfully", response.getBody());
+        verify(userRepository).findByUsername(username);
+        verify(jobService).applyToJob(jobId, user);
+    }
+
+    @Test
+    void applyToJob_userNotFound_returnsUnauthorized() {
+        Long jobId = 1L;
+        String username = "user1";
+
+        Principal principal = () -> username;
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        ResponseEntity<String> response = jobController.applyToJob(jobId, principal);
+
+        assertEquals(401, response.getStatusCodeValue());
+        assertEquals("User not found", response.getBody());
+        verify(userRepository).findByUsername(username);
+        verify(jobService, never()).applyToJob(anyLong(), any());
+    }
+
+    @Test
+    void applyToJob_applyFails_returnsBadRequest() {
+        Long jobId = 1L;
+        String username = "user1";
+        User user = new User();
+
+        Principal principal = () -> username;
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(jobService.applyToJob(jobId, user)).thenReturn(false);
+
+        ResponseEntity<String> response = jobController.applyToJob(jobId, principal);
+
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("Failed to apply", response.getBody());
+        verify(userRepository).findByUsername(username);
+        verify(jobService).applyToJob(jobId, user);
+    }
+
+    @Test
+    void findJobById_found_returnsJob() {
+        Long jobId = 1L;
+        Job job = new Job();
+
+        when(jobService.getJobById(jobId)).thenReturn(job);
+
+        ResponseEntity<Job> response = jobController.findJobById(jobId);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(job, response.getBody());
+        verify(jobService).getJobById(jobId);
+    }
+
+    @Test
+    void findJobById_notFound_returnsNotFound() {
+        Long jobId = 1L;
+        when(jobService.getJobById(jobId)).thenReturn(null);
+
+        ResponseEntity<Job> response = jobController.findJobById(jobId);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertNull(response.getBody());
+        verify(jobService).getJobById(jobId);
+    }
+
+    @Test
+    void deleteJobById_success_returnsOk() {
+        Long jobId = 1L;
+        when(jobService.deleteJobById(jobId)).thenReturn(true);
+
+        ResponseEntity<String> response = jobController.deleteJobById(jobId);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("job deleted", response.getBody());
+        verify(jobService).deleteJobById(jobId);
+    }
+
+    @Test
+    void deleteJobById_failure_returnsNotFound() {
+        Long jobId = 1L;
+        when(jobService.deleteJobById(jobId)).thenReturn(false);
+
+        ResponseEntity<String> response = jobController.deleteJobById(jobId);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertEquals("job could not be deleted", response.getBody());
+        verify(jobService).deleteJobById(jobId);
+    }
+
+    @Test
+    void updateJobById_success_returnsOk() {
+        Long jobId = 1L;
+        Job job = new Job();
+
+        when(jobService.updateJobById(jobId, job)).thenReturn(true);
+
+        ResponseEntity<String> response = jobController.updateJobById(jobId, job);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Updated", response.getBody());
+        verify(jobService).updateJobById(jobId, job);
+    }
+
+    @Test
+    void updateJobById_failure_returnsNotFound() {
+        Long jobId = 1L;
+        Job job = new Job();
+
+        when(jobService.updateJobById(jobId, job)).thenReturn(false);
+
+        ResponseEntity<String> response = jobController.updateJobById(jobId, job);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertEquals("Could not update", response.getBody());
+        verify(jobService).updateJobById(jobId, job);
     }
 }

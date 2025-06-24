@@ -2,17 +2,23 @@ package com.cristeabianca.job_application.review;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class ReviewControllerTest {
+public class ReviewControllerTest {
 
     @Mock
     private ReviewService reviewService;
@@ -20,116 +26,193 @@ class ReviewControllerTest {
     @InjectMocks
     private ReviewController reviewController;
 
-    private Review review;
+    @Mock
+    private UserDetails userDetails;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        review = new Review();
-        review.setId(1L);
-        review.setTitle("Good company");
-        review.setDescription("Nice place to work");
-        review.setRating(4.7);
     }
 
     @Test
-    void getAllReviews_ReturnsReviews() {
-        when(reviewService.getAllReviews(1L)).thenReturn(List.of(review));
+    void testGetAllReviews() {
+        Long companyId = 1L;
+        Review review = new Review();
+        when(reviewService.getAllReviews(companyId)).thenReturn(List.of(review));
 
-        ResponseEntity<List<Review>> response = reviewController.getAllReviews(1L);
+        ResponseEntity<List<Review>> response = reviewController.getAllReviews(companyId);
 
-        assertEquals(200, response.getStatusCodeValue());
-        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
-        verify(reviewService, times(1)).getAllReviews(1L);
+        verify(reviewService).getAllReviews(companyId);
     }
 
     @Test
-    void addReview_ReturnsOk_WhenSuccess() {
-        when(reviewService.addReview(any(Review.class), eq(1L), eq("testuser"))).thenReturn(true);
+    void testGetAllReviewsAdmin_WithAdminRole() {
+        doReturn(Collections.singleton(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                .when(userDetails)
+                .getAuthorities();
 
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("testuser");
+        Review review = new Review();
+        when(reviewService.getAllReviews()).thenReturn(List.of(review));
 
-        ResponseEntity<String> response = reviewController.addReview(1L, review, userDetails);
+        ResponseEntity<List<Review>> response = reviewController.getAllReviewsAdmin(userDetails);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+        verify(reviewService).getAllReviews();
+    }
+
+    @Test
+    void testGetAllReviewsAdmin_WithoutAdminRole() {
+        doReturn(new HashSet<>(Set.of(new SimpleGrantedAuthority("ROLE_USER"))))
+                .when(userDetails)
+                .getAuthorities();
+        ResponseEntity<List<Review>> response = reviewController.getAllReviewsAdmin(userDetails);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(reviewService, never()).getAllReviews();
+    }
+
+    @Test
+    void testAddReview_Success() {
+        Long companyId = 1L;
+        Review review = new Review();
+        when(userDetails.getUsername()).thenReturn("user");
+        when(reviewService.addReview(review, companyId, "user")).thenReturn(true);
+
+        ResponseEntity<String> response = reviewController.addReview(companyId, review, userDetails);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Review added successfully", response.getBody());
+        verify(reviewService).addReview(review, companyId, "user");
     }
 
     @Test
-    void addReview_ReturnsNotFound_WhenFail() {
-        when(reviewService.addReview(any(Review.class), eq(1L), eq("testuser"))).thenReturn(false);
+    void testAddReview_NotAuthenticated() {
+        Long companyId = 1L;
+        Review review = new Review();
 
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("testuser");
+        ResponseEntity<String> response = reviewController.addReview(companyId, review, null);
 
-        ResponseEntity<String> response = reviewController.addReview(1L, review, userDetails);
-
-        assertEquals(404, response.getStatusCodeValue());
-        assertEquals("Review could not be added.", response.getBody());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("User not authenticated", response.getBody());
+        verify(reviewService, never()).addReview(any(), anyLong(), anyString());
     }
 
     @Test
-    void getReview_ReturnsReview() {
-        when(reviewService.getReview(1L, 1L)).thenReturn(review);
+    void testAddReview_Failure() {
+        Long companyId = 1L;
+        Review review = new Review();
+        when(userDetails.getUsername()).thenReturn("user");
+        when(reviewService.addReview(review, companyId, "user")).thenReturn(false);
 
-        ResponseEntity<Review> response = reviewController.getReview(1L, 1L);
+        ResponseEntity<String> response = reviewController.addReview(companyId, review, userDetails);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Review could not be added", response.getBody());
+        verify(reviewService).addReview(review, companyId, "user");
+    }
+
+    @Test
+    void testGetReview_Found() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
+        Review review = new Review();
+        when(reviewService.getReview(companyId, reviewId)).thenReturn(review);
+
+        ResponseEntity<Review> response = reviewController.getReview(companyId, reviewId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review, response.getBody());
     }
 
     @Test
-    void updateReview_ReturnsOk_WhenSuccess() {
-        when(reviewService.updateReview(1L, 1L, "testuser", review)).thenReturn(true);
+    void testGetReview_NotFound() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
+        when(reviewService.getReview(companyId, reviewId)).thenReturn(null);
 
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("testuser");
+        ResponseEntity<Review> response = reviewController.getReview(companyId, reviewId);
 
-        ResponseEntity<String> response = reviewController.updateReview(1L, 1L, review, userDetails);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
 
-        assertEquals(200, response.getStatusCodeValue());
+    @Test
+    void testUpdateReview_Success() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
+        Review updatedReview = new Review();
+        when(userDetails.getUsername()).thenReturn("user");
+        when(reviewService.updateReview(companyId, reviewId, "user", updatedReview)).thenReturn(true);
+
+        ResponseEntity<String> response = reviewController.updateReview(companyId, reviewId, updatedReview, userDetails);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Review updated successfully", response.getBody());
     }
 
     @Test
-    void updateReview_ReturnsNotFound_WhenFail() {
-        when(reviewService.updateReview(1L, 1L, "testuser", review)).thenReturn(false);
+    void testUpdateReview_NotAuthenticated() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
+        Review updatedReview = new Review();
 
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("testuser");
+        ResponseEntity<String> response = reviewController.updateReview(companyId, reviewId, updatedReview, null);
 
-        ResponseEntity<String> response = reviewController.updateReview(1L, 1L, review, userDetails);
-
-        assertEquals(404, response.getStatusCodeValue());
-        assertEquals("Review could not be updated.", response.getBody());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("User not authenticated", response.getBody());
     }
 
     @Test
-    void deleteReview_ReturnsOk_WhenSuccess() {
-        when(reviewService.deleteReview(1L, 1L, "testuser")).thenReturn(true);
+    void testUpdateReview_Failure() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
+        Review updatedReview = new Review();
+        when(userDetails.getUsername()).thenReturn("user");
+        when(reviewService.updateReview(companyId, reviewId, "user", updatedReview)).thenReturn(false);
 
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("testuser");
+        ResponseEntity<String> response = reviewController.updateReview(companyId, reviewId, updatedReview, userDetails);
 
-        ResponseEntity<String> response = reviewController.deleteReview(1L, 1L, userDetails);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Review could not be updated", response.getBody());
+    }
 
-        assertEquals(200, response.getStatusCodeValue());
+    @Test
+    void testDeleteReview_Success() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
+        when(userDetails.getUsername()).thenReturn("user");
+        when(reviewService.deleteReview(companyId, reviewId, "user")).thenReturn(true);
+
+        ResponseEntity<String> response = reviewController.deleteReview(companyId, reviewId, userDetails);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Review deleted successfully", response.getBody());
     }
 
     @Test
-    void deleteReview_ReturnsNotFound_WhenFail() {
-        when(reviewService.deleteReview(1L, 1L, "testuser")).thenReturn(false);
+    void testDeleteReview_NotAuthenticated() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
 
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn("testuser");
+        ResponseEntity<String> response = reviewController.deleteReview(companyId, reviewId, null);
 
-        ResponseEntity<String> response = reviewController.deleteReview(1L, 1L, userDetails);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("User not authenticated", response.getBody());
+    }
 
-        assertEquals(404, response.getStatusCodeValue());
-        assertEquals("Review could not be deleted.", response.getBody());
+    @Test
+    void testDeleteReview_Failure() {
+        Long companyId = 1L;
+        Long reviewId = 2L;
+        when(userDetails.getUsername()).thenReturn("user");
+        when(reviewService.deleteReview(companyId, reviewId, "user")).thenReturn(false);
+
+        ResponseEntity<String> response = reviewController.deleteReview(companyId, reviewId, userDetails);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Review could not be deleted", response.getBody());
     }
 }

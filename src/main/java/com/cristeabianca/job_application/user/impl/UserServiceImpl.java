@@ -24,16 +24,17 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
     @Autowired
     private DataSource dataSource;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+
 
     @Override
     public Page<User> getAllUsers(Pageable pageable) {
@@ -49,13 +50,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean createUser(User user) {
+        if (user == null) {
+            logger.warn("Attempted to create null user");
+            return false;
+        }
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            logger.warn("Attempted to create user with null or empty password");
+            return false;
+        }
+
         logger.info("Creating user with username: {}", user.getUsername());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         logger.debug("User {} created successfully", user.getUsername());
         return true;
     }
-
     @Override
     public boolean updateUser(Long id, User user) {
         logger.info("Updating user with id: {}", id);

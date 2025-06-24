@@ -10,6 +10,7 @@ import com.cristeabianca.job_application.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
@@ -78,16 +79,18 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public boolean deleteReview(Long reviewId, String username) {
-        Review review = reviewRepository.findById(reviewId).orElse(null);
+    public boolean deleteReview(Long companyId, Long reviewId, String username) {
+        Company company = companyService.getCompanyById(companyId);
+        if (company == null) return false;
 
-        if (review != null &&
-                review.getUser().getUsername().equals(username)) {
+        Optional<Review> opt = reviewRepository.findById(reviewId);
+        if (opt.isEmpty()) return false;
 
-            reviewRepository.delete(review);
-            return true;
-        }
+        Review rev = opt.get();
+        if (!rev.getUser().getUsername().equals(username)) return false;
 
-        return false;
+        reviewRepository.deleteById(reviewId);
+        return true;
     }
+
 }

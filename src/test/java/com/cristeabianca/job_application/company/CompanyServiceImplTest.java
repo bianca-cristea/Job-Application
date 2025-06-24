@@ -1,5 +1,8 @@
 package com.cristeabianca.job_application.company;
 
+import com.cristeabianca.job_application.company.Company;
+import com.cristeabianca.job_application.company.CompanyRepository;
+import com.cristeabianca.job_application.company.CompanyService;
 import com.cristeabianca.job_application.company.impl.CompanyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,116 +15,109 @@ import static org.mockito.Mockito.*;
 
 class CompanyServiceImplTest {
 
-    @Mock
-    private CompanyRepository companyRepository;
-
-    @InjectMocks
-    private CompanyServiceImpl companyService;
+    @Mock private CompanyRepository companyRepository;
+    @InjectMocks private CompanyServiceImpl companyService;
 
     private Company company;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         MockitoAnnotations.openMocks(this);
+
         company = new Company();
         company.setId(1L);
-        company.setName("Test Company");
-        company.setDescription("Description");
-        company.setJobs(Collections.emptyList());
+        company.setName("SoftCorp");
+        company.setDescription("Enterprise Solutions");
     }
 
     @Test
-    void getAllCompanies_shouldReturnList() {
+    void shouldReturnAllCompanies() {
         when(companyRepository.findAll()).thenReturn(List.of(company));
 
         List<Company> companies = companyService.getAllCompanies();
 
         assertEquals(1, companies.size());
-        verify(companyRepository).findAll();
+        assertEquals("SoftCorp", companies.get(0).getName());
     }
 
     @Test
-    void getCompanyById_whenExists_shouldReturnCompany() {
+    void shouldReturnCompanyById() {
         when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
 
         Company found = companyService.getCompanyById(1L);
 
         assertNotNull(found);
-        assertEquals("Test Company", found.getName());
+        assertEquals("SoftCorp", found.getName());
     }
 
     @Test
-    void getCompanyById_whenNotExists_shouldReturnNull() {
-        when(companyRepository.findById(2L)).thenReturn(Optional.empty());
+    void shouldReturnNullIfCompanyNotFound() {
+        when(companyRepository.findById(999L)).thenReturn(Optional.empty());
 
-        Company found = companyService.getCompanyById(2L);
+        Company result = companyService.getCompanyById(999L);
 
-        assertNull(found);
+        assertNull(result);
     }
 
     @Test
-    void createCompany_shouldReturnTrueOnSuccess() {
-        when(companyRepository.save(any(Company.class))).thenReturn(company);
+    void shouldCreateCompanySuccessfully() {
+        when(companyRepository.save(company)).thenReturn(company);
 
-        boolean created = companyService.createCompany(company);
+        boolean result = companyService.createCompany(company);
 
-        assertTrue(created);
+        assertTrue(result);
         verify(companyRepository).save(company);
     }
 
     @Test
-    void createCompany_shouldReturnFalseOnException() {
-        when(companyRepository.save(any(Company.class))).thenThrow(new RuntimeException());
+    void shouldFailToCreateCompanyOnException() {
+        when(companyRepository.save(any())).thenThrow(RuntimeException.class);
 
-        boolean created = companyService.createCompany(company);
+        boolean result = companyService.createCompany(company);
 
-        assertFalse(created);
+        assertFalse(result);
     }
 
     @Test
-    void updateCompany_whenExists_shouldUpdateAndReturnTrue() {
-        Company updatedCompany = new Company();
-        updatedCompany.setName("Updated Name");
-        updatedCompany.setDescription("Updated Desc");
-        updatedCompany.setJobs(Collections.emptyList());
+    void shouldUpdateCompanyIfExists() {
+        Company updated = new Company();
+        updated.setName("Updated Name");
+        updated.setDescription("Updated Description");
 
         when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
-        when(companyRepository.save(any(Company.class))).thenReturn(company);
+        when(companyRepository.save(any())).thenReturn(company);
 
-        boolean updated = companyService.updateCompany(1L, updatedCompany);
+        boolean result = companyService.updateCompany(1L, updated);
 
-        assertTrue(updated);
+        assertTrue(result);
         assertEquals("Updated Name", company.getName());
-        assertEquals("Updated Desc", company.getDescription());
-        verify(companyRepository).save(company);
+        assertEquals("Updated Description", company.getDescription());
     }
 
     @Test
-    void updateCompany_whenNotExists_shouldReturnFalse() {
-        when(companyRepository.findById(2L)).thenReturn(Optional.empty());
+    void shouldNotUpdateCompanyIfNotFound() {
+        when(companyRepository.findById(999L)).thenReturn(Optional.empty());
 
-        boolean updated = companyService.updateCompany(2L, company);
+        boolean result = companyService.updateCompany(999L, company);
 
-        assertFalse(updated);
-        verify(companyRepository, never()).save(any());
+        assertFalse(result);
     }
 
     @Test
-    void deleteCompanyById_shouldReturnTrueOnSuccess() {
+    void shouldDeleteCompanySuccessfully() {
         doNothing().when(companyRepository).deleteById(1L);
 
-        boolean deleted = companyService.deleteCompanyById(1L);
+        boolean result = companyService.deleteCompanyById(1L);
 
-        assertTrue(deleted);
-        verify(companyRepository).deleteById(1L);
+        assertTrue(result);
     }
 
     @Test
-    void deleteCompanyById_shouldReturnFalseOnException() {
-        doThrow(new RuntimeException()).when(companyRepository).deleteById(1L);
+    void shouldFailToDeleteOnException() {
+        doThrow(RuntimeException.class).when(companyRepository).deleteById(1L);
 
-        boolean deleted = companyService.deleteCompanyById(1L);
+        boolean result = companyService.deleteCompanyById(1L);
 
-        assertFalse(deleted);
+        assertFalse(result);
     }
 }

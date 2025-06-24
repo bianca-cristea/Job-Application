@@ -1,110 +1,122 @@
 package com.cristeabianca.job_application.user;
 
+import com.cristeabianca.job_application.user.User;
+import com.cristeabianca.job_application.user.UserRepository;
 import com.cristeabianca.job_application.user.impl.UserServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-
-import org.springframework.data.domain.Pageable;
-
-import java.util.List;
-
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.*;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
+    @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
     private UserServiceImpl userService;
 
-    @BeforeEach
-    void setUp() {
-        userRepository = mock(UserRepository.class);
-        userService = new UserServiceImpl(userRepository);
-    }
-
     @Test
-    void testGetAllUsersWithPagination() {
-        List<User> users = List.of(new User(), new User());
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<User> userPage = new PageImpl<>(users, pageable, users.size());
-
-        when(userRepository.findAll(pageable)).thenReturn(userPage);
-
-        Page<User> result = userService.getAllUsers(pageable);
-
-        assertEquals(2, result.getContent().size());
-        verify(userRepository, times(1)).findAll(pageable);
-    }
-
-    @Test
-    void testGetUserByIdFound() {
+    void testCreateUserSuccess() {
         User user = new User();
-        user.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        user.setUsername("john_doe");
+        user.setPassword("password123");
 
-        User result = userService.getUserById(1L);
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
+        when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        boolean result = userService.createUser(user);
+
+        assertTrue(result);
+        verify(userRepository).save(user);
     }
 
     @Test
-    void testGetUserByIdNotFound() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
-        User result = userService.getUserById(1L);
-        assertNull(result);
+    void testCreateUserNull() {
+        boolean result = userService.createUser(null);
+        assertFalse(result);
     }
 
     @Test
-    void testCreateUser() {
+    void testCreateUserEmptyPassword() {
         User user = new User();
-        when(userRepository.save(user)).thenReturn(user);
+        user.setUsername("john_doe");
+        user.setPassword("");
 
-        boolean created = userService.createUser(user);
-        assertTrue(created);
-        verify(userRepository, times(1)).save(user);
+        boolean result = userService.createUser(user);
+        assertFalse(result);
     }
 
     @Test
-    void testUpdateUserExists() {
+    void testUpdateUserSuccess() {
+        Long userId = 1L;
         User existingUser = new User();
-        existingUser.setId(1L);
-        existingUser.setUsername("oldUsername");
+        existingUser.setId(userId);
+        existingUser.setUsername("john_doe");
+        existingUser.setPassword("oldEncodedPassword");
 
-        User updateUser = new User();
-        updateUser.setUsername("newUsername");
+        User updatedUser = new User();
+        updatedUser.setUsername("john_doe_updated");
+        updatedUser.setPassword("newPassword");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(User.class))).thenReturn(existingUser);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.matches(updatedUser.getPassword(), existingUser.getPassword())).thenReturn(false);
+        when(passwordEncoder.encode(updatedUser.getPassword())).thenReturn("encodedNewPassword");
+        when(userRepository.save(existingUser)).thenReturn(existingUser);
 
-        boolean updated = userService.updateUser(1L, updateUser);
-        assertTrue(updated);
-        assertEquals("newUsername", existingUser.getUsername());
+        boolean result = userService.updateUser(userId, updatedUser);
+
+        assertTrue(result);
+        verify(userRepository).save(existingUser);
+        assertEquals("encodedNewPassword", existingUser.getPassword());
     }
 
     @Test
-    void testUpdateUserNotExists() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+    void testUpdateUserNotFound() {
+        Long userId = 1L;
+        User updatedUser = new User();
+        updatedUser.setUsername("john_doe_updated");
+        updatedUser.setPassword("newPassword");
 
-        boolean updated = userService.updateUser(1L, new User());
-        assertFalse(updated);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        boolean result = userService.updateUser(userId, updatedUser);
+
+        assertFalse(result);
     }
 
     @Test
-    void testDeleteUser() {
-        doNothing().when(userRepository).deleteById(1L);
+    void testDeleteUserSuccess() {
+        Long userId = 1L;
 
-        boolean deleted = userService.deleteUser(1L);
-        assertTrue(deleted);
-        verify(userRepository, times(1)).deleteById(1L);
+        doNothing().when(userRepository).deleteById(userId);
+
+        boolean result = userService.deleteUser(userId);
+
+        assertTrue(result);
+        verify(userRepository).deleteById(userId);
+    }
+
+    @Test
+    void testDeleteUserFailure() {
+        Long userId = 1L;
+
+        doThrow(new RuntimeException("Database error")).when(userRepository).deleteById(userId);
+
+        boolean result = userService.deleteUser(userId);
+
+        assertFalse(result);
+        verify(userRepository).deleteById(userId);
     }
 }

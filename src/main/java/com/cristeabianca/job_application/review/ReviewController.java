@@ -89,11 +89,12 @@ public class ReviewController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
-        boolean success = reviewService.deleteReview(reviewId, userDetails.getUsername());
+        boolean success = reviewService.deleteReview(companyId, reviewId, userDetails.getUsername());  // aici am adăugat companyId
         if (success) {
             return ResponseEntity.ok("Review deleted successfully");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Review could not be deleted");
         }
     }
+
 }

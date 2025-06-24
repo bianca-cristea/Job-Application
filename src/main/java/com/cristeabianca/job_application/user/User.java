@@ -34,6 +34,15 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
 
+    public User(Long id, String username, String password, Set<Role> roles) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    public User() {
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

@@ -1,7 +1,8 @@
-package com.cristeabianca.job_application.role.impl;
+package com.cristeabianca.job_application.role;
 
 import com.cristeabianca.job_application.role.Role;
 import com.cristeabianca.job_application.role.RoleRepository;
+import com.cristeabianca.job_application.role.impl.RoleServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

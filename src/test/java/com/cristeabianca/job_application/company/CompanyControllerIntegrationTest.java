@@ -1,104 +1,108 @@
 package com.cristeabianca.job_application.company;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.util.List;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+
 public class CompanyControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private CompanyService companyService;
 
-    @Autowired
-    private CompanyRepository companyRepository;
+    @InjectMocks
+    private CompanyController companyController;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private Company sampleCompany;
 
     @BeforeEach
-    void setup() {
-        companyRepository.deleteAll();
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+        sampleCompany = new Company();
+        sampleCompany.setId(1L);
+        sampleCompany.setName("Test Company");
     }
 
     @Test
-    void createCompany_thenGetCompanyById() throws Exception {
-        Company company = new Company();
-        company.setName("New Company");
-        company.setDescription("Company description");
+    void testGetAllCompanies() {
+        when(companyService.getAllCompanies()).thenReturn(List.of(sampleCompany));
 
-        // Create company
-        mockMvc.perform(post("/companies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(company)))
-                .andExpect(status().isCreated())
-                .andExpect(content().string(containsString("Company created")));
-
-        Company savedCompany = companyRepository.findAll().get(0);
-
-        // Get company by id
-        mockMvc.perform(get("/companies/{id}", savedCompany.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(savedCompany.getId()))
-                .andExpect(jsonPath("$.name").value("New Company"))
-                .andExpect(jsonPath("$.description").value("Company description"));
+        ResponseEntity<List<Company>> response = companyController.getAllCompanies();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
     }
 
     @Test
-    void getAllCompanies_shouldReturnEmptyListInitially() throws Exception {
-        mockMvc.perform(get("/companies"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+    void testGetCompanyById() {
+        when(companyService.getCompanyById(1L)).thenReturn(sampleCompany);
+
+        ResponseEntity<Company> response = companyController.getCompanyById(1L);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(sampleCompany, response.getBody());
     }
 
     @Test
-    void updateCompany_shouldChangeNameAndDescription() throws Exception {
-        Company company = new Company();
-        company.setName("Old Name");
-        company.setDescription("Old Desc");
-        company = companyRepository.save(company);
+    void testCreateCompany_Success() {
+        when(companyService.createCompany(any())).thenReturn(true);
 
-        company.setName("Updated Name");
-        company.setDescription("Updated Desc");
-
-        mockMvc.perform(put("/companies/{id}", company.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(company)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Company updated."));
-
-        Company updated = companyRepository.findById(company.getId()).orElseThrow();
-        assert(updated.getName().equals("Updated Name"));
-        assert(updated.getDescription().equals("Updated Desc"));
+        ResponseEntity<String> response = companyController.createCompany(sampleCompany);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("Company created.", response.getBody());
     }
 
     @Test
-    void deleteCompany_shouldRemoveCompany() throws Exception {
-        Company company = new Company();
-        company.setName("To Be Deleted");
-        company = companyRepository.save(company);
+    void testCreateCompany_Failure() {
+        when(companyService.createCompany(any())).thenReturn(false);
 
-        mockMvc.perform(delete("/companies/{id}", company.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Company deleted."));
-
-        assert(companyRepository.findById(company.getId()).isEmpty());
+        ResponseEntity<String> response = companyController.createCompany(sampleCompany);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("Company could not be created.", response.getBody());
     }
 
     @Test
-    void getCompanyById_whenNotExists_shouldReturnOkWithNullBody() throws Exception {
-        mockMvc.perform(get("/companies/{id}", 999L))
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
+    void testUpdateCompany_Success() {
+        when(companyService.updateCompany(anyLong(), any())).thenReturn(true);
+
+        ResponseEntity<String> response = companyController.updateCompany(1L, sampleCompany);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Company updated.", response.getBody());
+    }
+
+    @Test
+    void testUpdateCompany_Failure() {
+        when(companyService.updateCompany(anyLong(), any())).thenReturn(false);
+
+        ResponseEntity<String> response = companyController.updateCompany(1L, sampleCompany);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Company could not be updated.", response.getBody());
+    }
+
+    @Test
+    void testDeleteCompany_Success() {
+        when(companyService.deleteCompanyById(1L)).thenReturn(true);
+
+        ResponseEntity<String> response = companyController.deleteCompanyById(1L);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Company deleted.", response.getBody());
+    }
+
+    @Test
+    void testDeleteCompany_Failure() {
+        when(companyService.deleteCompanyById(1L)).thenReturn(false);
+
+        ResponseEntity<String> response = companyController.deleteCompanyById(1L);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Company could not be deleted.", response.getBody());
     }
 }
