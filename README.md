@@ -1,14 +1,10 @@
-# Job ApplicationAdd commentMore actions
-
-Java Spring Boot Project
+# Job App - Monolithic
 Aplicație web realizată în Java (Spring Boot) și React, pentru disciplina **Aplicații Web pentru Baze de Date** – Master, Anul I (2025).
 
 ## Funcționalități
 ## Autor
 Cristea Bianca-Ștefania
-
-- CRUD Operations
--
+ 
 ## Tehnologii folosite
 - Java 21, Spring Boot, Spring Data JPA, Spring Security
 - PostgreSQL (runtime)
@@ -16,9 +12,7 @@ Cristea Bianca-Ștefania
 - React
 - JUnit 5 (testare de integrare)
 - Spring Profiles (dev/test), logging
-
-## Autor
-Cristea Bianca-Stefania
+ 
 ## Funcționalități cheie
 - CRUD complet pentru toate entitățile
 - Relații JPA: OneToOne, OneToMany, ManyToOne, ManyToMany
