@@ -1,79 +1,38 @@
 package com.cristeabianca.jobms.interview;
 
-import com.cristeabianca.job_application.application.Application;
-import com.cristeabianca.job_application.job.Job;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.cristeabianca.jobms.job.Job;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Table(name = "interview")
 public class Interview {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    @Column(name = "scheduled_at", nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime scheduledAt;
 
+    private Long userId;
+    private Long applicationId;
 
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "job_id")
-    private Job job;
+    private Job jobId;
 
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "application_id")
-    private Application application;
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Interview() {
-    }
+    public LocalDateTime getScheduledAt() { return scheduledAt; }
+    public void setScheduledAt(LocalDateTime scheduledAt) { this.scheduledAt = scheduledAt; }
 
-    public Interview(Long id, LocalDateTime scheduledAt, Job job, Application application) {
-        this.id = id;
-        this.scheduledAt = scheduledAt;
-        this.job = job;
-        this.application = application;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getApplicationId() { return applicationId; }
+    public void setApplicationId(Long applicationId) { this.applicationId = applicationId; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getScheduledAt() {
-        return scheduledAt;
-    }
-
-    public void setScheduledAt(LocalDateTime scheduledAt) {
-        this.scheduledAt = scheduledAt;
-    }
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        this.job = job;
-    }
-    public void setJobTitle(String jobTitle) {
-        this.job.setTitle(jobTitle);
-    }
-    public Application getApplication() {
-        return application;
-    }
-
-    public void setApplication(Application application) {
-        this.application = application;
-    }
+    public Job getJobId() { return jobId; }
+    public void setJobId(Job jobId) { this.jobId = jobId; }
 }

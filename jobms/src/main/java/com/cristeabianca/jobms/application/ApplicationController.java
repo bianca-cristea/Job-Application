@@ -1,97 +1,71 @@
 package com.cristeabianca.jobms.application;
 
-import com.cristeabianca.job_application.application.ApplicationRepository;
-import com.cristeabianca.job_application.interview.Interview;
-import com.cristeabianca.job_application.interview.InterviewRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/applications")
+@RequestMapping("/api/applications")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
-    private final ApplicationRepository applicationRepository;
-    private final InterviewRepository interviewRepository;
 
-    public ApplicationController(ApplicationService applicationService,
-                                 ApplicationRepository applicationRepository,
-                                 InterviewRepository interviewRepository) {
+    public ApplicationController(ApplicationService applicationService) {
         this.applicationService = applicationService;
-        this.applicationRepository = applicationRepository;
-        this.interviewRepository = interviewRepository;
     }
 
     @GetMapping
     public ResponseEntity<List<Application>> getAllApplications() {
-        return new ResponseEntity<>(applicationService.getAllApplications(), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Application> getById(@PathVariable Long id) {
-        Application app = applicationService.getApplicationById(id);
-        return app != null
-                ? new ResponseEntity<>(app, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(applicationService.getAllApplications());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Application>> getByUser(@PathVariable Long userId) {
-        return new ResponseEntity<>(applicationService.getApplicationsByUser(userId), HttpStatus.OK);
+    public ResponseEntity<List<Application>> getApplicationsByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(applicationService.getApplicationsByUser(userId));
     }
 
     @GetMapping("/job/{jobId}")
-    public ResponseEntity<List<Application>> getByJob(@PathVariable Long jobId) {
-        return new ResponseEntity<>(applicationService.getApplicationsByJob(jobId), HttpStatus.OK);
+    public ResponseEntity<List<Application>> getApplicationsByJob(@PathVariable Long jobId) {
+        return ResponseEntity.ok(applicationService.getApplicationsByJob(jobId));
     }
 
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<String> updateApplicationStatus(@PathVariable Long id, @RequestParam String status) {
-        Optional<Application> optionalApplication = applicationRepository.findById(id);
-        if (optionalApplication.isEmpty()) {
-            return new ResponseEntity<>("Application not found", HttpStatus.NOT_FOUND);
+    @GetMapping("/{id}")
+    public ResponseEntity<Application> getApplicationById(@PathVariable Long id) {
+        Application app = applicationService.getApplicationById(id);
+        if (app == null) {
+            return ResponseEntity.notFound().build();
         }
-        Application application = optionalApplication.get();
-        application.setStatus(status);
-
-        if ("interview".equalsIgnoreCase(status) && application.getInterview() == null) {
-            Interview interview = new Interview();
-            interview.setApplication(application);
-            interviewRepository.save(interview);
-        }
-
-        applicationRepository.save(application);
-        return new ResponseEntity<>("Status updated", HttpStatus.OK);
+        return ResponseEntity.ok(app);
     }
 
-    @PostMapping("/user/{userId}/job/{jobId}")
-    public ResponseEntity<String> create(@RequestBody Application app,
-                                         @PathVariable Long userId,
-                                         @PathVariable Long jobId) {
-        boolean result = applicationService.createApplication(app, userId, jobId);
-        return result
-                ? new ResponseEntity<>("Application created", HttpStatus.CREATED)
-                : new ResponseEntity<>("Failed to create application", HttpStatus.BAD_REQUEST);
+    @PostMapping
+    public ResponseEntity<String> createApplication(@RequestBody Application application,
+                                                    @RequestParam Long userId,
+                                                    @RequestParam Long jobId) {
+        boolean created = applicationService.createApplication(application, userId, jobId);
+        if (created) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Application created successfully");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to create application");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody Application app) {
-        boolean updated = applicationService.updateApplication(id, app);
-        return updated
-                ? new ResponseEntity<>("Updated", HttpStatus.OK)
-                : new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> updateApplication(@PathVariable Long id, @RequestBody Application application) {
+        boolean updated = applicationService.updateApplication(id, application);
+        if (updated) {
+            return ResponseEntity.ok("Application updated successfully");
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    public ResponseEntity<String> deleteApplication(@PathVariable Long id) {
         boolean deleted = applicationService.deleteApplication(id);
-        return deleted
-                ? new ResponseEntity<>("Deleted", HttpStatus.OK)
-                : new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

@@ -1,33 +1,33 @@
 package com.cristeabianca.companyms.review;
 
-import com.cristeabianca.job_application.company.Company;
-import com.cristeabianca.job_application.user.User;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+
 @Entity
-@Table(name = "review")
+@Table(name = "reviews")
+
 public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Long id;
+    private Long id;
+
     private String title;
+
     private String description;
-    private double rating;
 
+    private int rating;
 
-    @ManyToOne
-    @JsonIgnoreProperties({"reviews", "jobs"})
-    private Company company;
+    private Long companyId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String username;
 
-
-
-
-    public Review() {
+    public Review(String title, String description, int rating, Long companyId, String username) {
+        this.title = title;
+        this.description = description;
+        this.rating = rating;
+        this.companyId = companyId;
+        this.username = username;
     }
 
     public Long getId() {
@@ -46,14 +46,6 @@ public class Review {
         this.title = title;
     }
 
-    public Company getCompany() {
-        return company;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -62,19 +54,27 @@ public class Review {
         this.description = description;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public double getRating() {
+    public int getRating() {
         return rating;
     }
 
-    public void setRating(double rating) {
+    public void setRating(int rating) {
         this.rating = rating;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

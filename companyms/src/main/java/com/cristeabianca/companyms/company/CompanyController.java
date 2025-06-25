@@ -7,49 +7,51 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/companies")
+@RequestMapping("/api/companies")
 public class CompanyController {
 
-    CompanyService companyService;
+    private final CompanyService companyService;
 
     public CompanyController(CompanyService companyService) {
         this.companyService = companyService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Company>> getAllCompanies(){
-        return new ResponseEntity<>(companyService.getAllCompanies(), HttpStatus.OK);
+    public ResponseEntity<List<Company>> getAllCompanies() {
+        List<Company> companies = companyService.getAllCompanies();
+        return ResponseEntity.ok(companies);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Company> getCompanyById(@PathVariable  Long id){
-        return new ResponseEntity<>(companyService.getCompanyById(id),HttpStatus.OK);
+    public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
+        Company company = companyService.getCompanyById(id);
+        if (company != null) {
+            return ResponseEntity.ok(company);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public ResponseEntity<String> createCompany(@RequestBody  Company company){
-        if(companyService.createCompany(company)){
-            return new ResponseEntity<>("Company created.",HttpStatus.CREATED);
-        }else{
-            return new ResponseEntity<>("Company could not be created.",HttpStatus.CREATED);
-        }
+    public ResponseEntity<Company> addCompany(@RequestBody Company company) {
+        Company created = companyService.addCompany(company);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCompany(@PathVariable  Long id, @RequestBody Company company){
-        if(companyService.updateCompany(id,company)){
-            return new ResponseEntity<>("Company updated.",HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("Company could not be updated.",HttpStatus.NOT_FOUND);
+    public ResponseEntity<Company> updateCompany(@PathVariable Long id, @RequestBody Company company) {
+        Company updated = companyService.updateCompany(id, company);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
         }
-    }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCompanyById(@PathVariable Long id){
-        if(companyService.deleteCompanyById(id)){
-            return new ResponseEntity<>("Company deleted.",HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("Company could not be deleted.",HttpStatus.NOT_FOUND);
-        }
+        return ResponseEntity.notFound().build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
+        boolean deleted = companyService.deleteCompany(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

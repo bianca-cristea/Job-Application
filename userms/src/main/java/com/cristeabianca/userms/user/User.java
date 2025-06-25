@@ -1,6 +1,6 @@
 package com.cristeabianca.userms.user;
 
-import com.cristeabianca.job_application.role.Role;
+import com.cristeabianca.userms.role.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

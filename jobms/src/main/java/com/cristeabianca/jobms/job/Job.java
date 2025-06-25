@@ -14,6 +14,7 @@ public class Job {
     private String minSalary;
     private String maxSalary;
     private String location;
+
     private Long companyId;
 
     public Job() {}

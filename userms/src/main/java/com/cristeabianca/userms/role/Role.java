@@ -1,7 +1,7 @@
 package com.cristeabianca.userms.role;
 
-import com.cristeabianca.job_application.user.User;
 import jakarta.persistence.*;
+import com.cristeabianca.userms.user.User;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,16 +13,13 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(unique = true, nullable = false)
     private String name;
 
     @ManyToMany(mappedBy = "roles")
     private Set<User> users = new HashSet<>();
 
-
-    public Role() {
-    }
+    public Role() {}
 
     public Role(Long id, String name) {
         this.id = id;
@@ -43,5 +40,13 @@ public class Role {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }

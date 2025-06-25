@@ -1,14 +1,11 @@
 package com.cristeabianca.jobms.application.impl;
 
-import com.cristeabianca.job_application.application.Application;
-import com.cristeabianca.job_application.application.ApplicationRepository;
-import com.cristeabianca.job_application.application.ApplicationService;
-import com.cristeabianca.job_application.job.Job;
-import com.cristeabianca.job_application.job.JobRepository;
-import com.cristeabianca.job_application.user.User;
-import com.cristeabianca.job_application.user.UserRepository;
+import com.cristeabianca.jobms.application.Application;
+import com.cristeabianca.jobms.application.ApplicationRepository;
+import com.cristeabianca.jobms.application.ApplicationService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,15 +13,9 @@ import java.util.Optional;
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final ApplicationRepository applicationRepository;
-    private final UserRepository userRepository;
-    private final JobRepository jobRepository;
 
-    public ApplicationServiceImpl(ApplicationRepository applicationRepository,
-                                  UserRepository userRepository,
-                                  JobRepository jobRepository) {
+    public ApplicationServiceImpl(ApplicationRepository applicationRepository) {
         this.applicationRepository = applicationRepository;
-        this.userRepository = userRepository;
-        this.jobRepository = jobRepository;
     }
 
     @Override
@@ -49,16 +40,16 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public boolean createApplication(Application application, Long userId, Long jobId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        Optional<Job> jobOpt = jobRepository.findById(jobId);
-
-        if (userOpt.isEmpty() || jobOpt.isEmpty()) {
+        if (userId == null || jobId == null) {
             return false;
         }
 
-        application.setUser(userOpt.get());
-        application.setJob(jobOpt.get());
-        application.setStatus(application.getStatus() != null ? application.getStatus() : "Pending");
+        application.setUserId(userId);
+        application.setJobId(jobId);
+        if (application.getStatus() == null) {
+            application.setStatus("Pending");
+        }
+        application.setCreatedAt(LocalDateTime.now());
 
         applicationRepository.save(application);
         return true;
@@ -73,14 +64,18 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         Application existingApp = existingOpt.get();
-        existingApp.setStatus(updatedApp.getStatus());
 
-        if (updatedApp.getUser() != null) {
-            existingApp.setUser(updatedApp.getUser());
+        if (updatedApp.getStatus() != null) {
+            existingApp.setStatus(updatedApp.getStatus());
         }
-
-        if (updatedApp.getJob() != null) {
-            existingApp.setJob(updatedApp.getJob());
+        if (updatedApp.getUserId() != null) {
+            existingApp.setUserId(updatedApp.getUserId());
+        }
+        if (updatedApp.getJobId() != null) {
+            existingApp.setJobId(updatedApp.getJobId());
+        }
+        if (updatedApp.getInterviewId() != null) {
+            existingApp.setInterviewId(updatedApp.getInterviewId());
         }
 
         applicationRepository.save(existingApp);
@@ -92,7 +87,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (!applicationRepository.existsById(id)) {
             return false;
         }
-
         applicationRepository.deleteById(id);
         return true;
     }

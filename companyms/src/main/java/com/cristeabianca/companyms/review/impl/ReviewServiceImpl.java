@@ -1,12 +1,8 @@
 package com.cristeabianca.companyms.review.impl;
 
-import com.cristeabianca.job_application.company.Company;
-import com.cristeabianca.job_application.company.CompanyService;
-import com.cristeabianca.job_application.review.Review;
-import com.cristeabianca.job_application.review.ReviewRepository;
-import com.cristeabianca.job_application.review.ReviewService;
-import com.cristeabianca.job_application.user.User;
-import com.cristeabianca.job_application.user.UserRepository;
+import com.cristeabianca.companyms.review.Review;
+import com.cristeabianca.companyms.review.ReviewRepository;
+import com.cristeabianca.companyms.review.ReviewService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,23 +12,19 @@ import java.util.Optional;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final CompanyService companyService;
-    private final UserRepository userRepository;
 
-    public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService, UserRepository userRepository) {
+    public ReviewServiceImpl(ReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
-        this.companyService = companyService;
-        this.userRepository = userRepository;
     }
 
     @Override
     public List<Review> getAllReviews(Long companyId) {
         return reviewRepository.findByCompanyId(companyId);
     }
+
     @Override
     public Review getReview(Long companyId, Long reviewId) {
-          return reviewRepository.findByCompanyIdAndId(companyId, reviewId)
-                .orElse(null);
+        return reviewRepository.findByCompanyIdAndId(companyId, reviewId).orElse(null);
     }
 
     @Override
@@ -41,13 +33,8 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public boolean addReview(Review review, Long companyId, String username) {
-        Company company = companyService.getCompanyById(companyId);
-        User user = userRepository.findByUsername(username).orElse(null);
-
-        if (company != null && user != null) {
-            review.setCompany(company);
-            review.setUser(user);
+    public boolean addReview(Review review) {
+         if (review.getCompanyId() != null && review.getUsername() != null) {
             reviewRepository.save(review);
             return true;
         }
@@ -55,42 +42,36 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review getReviewById(Long reviewId) {
-        return reviewRepository.findById(reviewId).orElse(null);
-    }
-
-    @Override
     public boolean updateReview(Long companyId, Long reviewId, String username, Review updatedReview) {
-        // Găsește review-ul după companyId și reviewId
-        Review existingReview = reviewRepository.findByCompanyIdAndId(companyId, reviewId).orElse(null);
+        Optional<Review> optReview = reviewRepository.findByCompanyIdAndId(companyId, reviewId);
 
-        if (existingReview != null &&
-                existingReview.getUser().getUsername().equals(username)) {
+        if (optReview.isPresent()) {
+            Review existingReview = optReview.get();
 
-            existingReview.setTitle(updatedReview.getTitle());
-            existingReview.setDescription(updatedReview.getDescription());
-            existingReview.setRating(updatedReview.getRating());
+            if (existingReview.getUsername().equals(username)) {
+                existingReview.setTitle(updatedReview.getTitle());
+                existingReview.setDescription(updatedReview.getDescription());
+                existingReview.setRating(updatedReview.getRating());
 
-            reviewRepository.save(existingReview);
-            return true;
+                reviewRepository.save(existingReview);
+                return true;
+            }
         }
-
         return false;
     }
 
     @Override
     public boolean deleteReview(Long companyId, Long reviewId, String username) {
-        Company company = companyService.getCompanyById(companyId);
-        if (company == null) return false;
+        Optional<Review> optReview = reviewRepository.findByCompanyIdAndId(companyId, reviewId);
 
-        Optional<Review> opt = reviewRepository.findById(reviewId);
-        if (opt.isEmpty()) return false;
+        if (optReview.isPresent()) {
+            Review review = optReview.get();
 
-        Review rev = opt.get();
-        if (!rev.getUser().getUsername().equals(username)) return false;
-
-        reviewRepository.deleteById(reviewId);
-        return true;
+            if (review.getUsername().equals(username)) {
+                reviewRepository.delete(review);
+                return true;
+            }
+        }
+        return false;
     }
-
 }

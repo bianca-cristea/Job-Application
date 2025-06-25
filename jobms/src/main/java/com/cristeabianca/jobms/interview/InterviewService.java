@@ -1,7 +1,5 @@
 package com.cristeabianca.jobms.interview;
 
-import com.cristeabianca.job_application.interview.Interview;
-import com.cristeabianca.job_application.interview.InterviewDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -18,5 +16,6 @@ public interface InterviewService {
 
     boolean deleteInterview(Long id);
     Map<String, List<Interview>> getAllGroupedByCompany();
+
 
 }

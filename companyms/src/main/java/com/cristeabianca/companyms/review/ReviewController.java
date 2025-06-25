@@ -1,17 +1,13 @@
 package com.cristeabianca.companyms.review;
 
-import com.cristeabianca.job_application.review.Review;
-import com.cristeabianca.job_application.review.ReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/companies")
+@RequestMapping("/companies/{companyId}/reviews")
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -20,81 +16,57 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    @GetMapping("/{companyId}/reviews")
+
+    @GetMapping
     public ResponseEntity<List<Review>> getAllReviews(@PathVariable Long companyId) {
         List<Review> reviews = reviewService.getAllReviews(companyId);
         return ResponseEntity.ok(reviews);
     }
 
-    @GetMapping("/admin/all")
-    public ResponseEntity<List<Review>> getAllReviewsAdmin(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null || userDetails.getAuthorities().stream()
-                .noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<Review> getReview(@PathVariable Long companyId, @PathVariable Long reviewId) {
+        Review review = reviewService.getReview(companyId, reviewId);
+        if (review == null) {
+            return ResponseEntity.notFound().build();
         }
-        List<Review> reviews = reviewService.getAllReviews();
-        return ResponseEntity.ok(reviews);
+        return ResponseEntity.ok(review);
     }
 
-    @PostMapping("/{companyId}/reviews")
+
+    @PostMapping
     public ResponseEntity<String> addReview(@PathVariable Long companyId,
                                             @RequestBody Review review,
-                                            @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+                                            @RequestParam String username) {
+        boolean created = reviewService.addReview(review, companyId, username);
+        if (created) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Review created successfully");
         }
-
-        boolean success = reviewService.addReview(review, companyId, userDetails.getUsername());
-        if (success) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("Review added successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Review could not be added");
-        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to create review");
     }
 
-    @GetMapping("/{companyId}/reviews/{reviewId}")
-    public ResponseEntity<Review> getReview(@PathVariable Long companyId,
-                                            @PathVariable Long reviewId) {
-        Review review = reviewService.getReview(companyId, reviewId);
-        if (review != null) {
-            return ResponseEntity.ok(review);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
 
-    @PutMapping("/{companyId}/reviews/{reviewId}")
-    public ResponseEntity<String> updateReview(
-            @PathVariable Long companyId,
-            @PathVariable Long reviewId,
-            @RequestBody Review updatedReview,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
-
-
-        boolean success = reviewService.updateReview(companyId, reviewId, userDetails.getUsername(), updatedReview);
-        if (success) {
+    @PutMapping("/{reviewId}")
+    public ResponseEntity<String> updateReview(@PathVariable Long companyId,
+                                               @PathVariable Long reviewId,
+                                               @RequestParam String username,
+                                               @RequestBody Review updatedReview) {
+        boolean updated = reviewService.updateReview(companyId, reviewId, username, updatedReview);
+        if (updated) {
             return ResponseEntity.ok("Review updated successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Review could not be updated");
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized to update this review");
     }
 
-    @DeleteMapping("/{companyId}/reviews/{reviewId}")
+
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<String> deleteReview(@PathVariable Long companyId,
                                                @PathVariable Long reviewId,
-                                               @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
-        boolean success = reviewService.deleteReview(companyId, reviewId, userDetails.getUsername());  // aici am adăugat companyId
-        if (success) {
+                                               @RequestParam String username) {
+        boolean deleted = reviewService.deleteReview(companyId, reviewId, username);
+        if (deleted) {
             return ResponseEntity.ok("Review deleted successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Review could not be deleted");
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized to delete this review");
     }
-
 }

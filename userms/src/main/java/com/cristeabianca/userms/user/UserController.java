@@ -1,6 +1,6 @@
 package com.cristeabianca.userms.user;
 
-import com.cristeabianca.job_application.jwt.JwtUtils;
+import com.cristeabianca.userms.jwt.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +20,12 @@ public class UserController {
 
     private final UserService userService;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -35,14 +41,12 @@ public class UserController {
         return new ResponseEntity<>(usersPage, HttpStatus.OK);
     }
 
+
     @PostMapping
     public ResponseEntity<String> createUser(@RequestBody @Valid User user) {
         boolean created = userService.createUser(user);
-        if (created) {
-            return new ResponseEntity<>("User created", HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>("Could not create user", HttpStatus.BAD_REQUEST);
-        }
+        return created ? new ResponseEntity<>("User created", HttpStatus.CREATED)
+                : new ResponseEntity<>("Could not create user", HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/{id}")
@@ -52,23 +56,17 @@ public class UserController {
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-
-
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody @Valid User user) {
-        boolean result = userService.updateUser(id, user);
-        return result ? new ResponseEntity<>("User updated", HttpStatus.OK)
+        boolean updated = userService.updateUser(id, user);
+        return updated ? new ResponseEntity<>("User updated", HttpStatus.OK)
                 : new ResponseEntity<>("Could not update user", HttpStatus.NOT_FOUND);
     }
-    @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        boolean result = userService.deleteUser(id);
-        return result ? new ResponseEntity<>("User deleted", HttpStatus.OK)
+        boolean deleted = userService.deleteUser(id);
+        return deleted ? new ResponseEntity<>("User deleted", HttpStatus.OK)
                 : new ResponseEntity<>("Could not delete user", HttpStatus.NOT_FOUND);
     }
 }

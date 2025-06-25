@@ -28,36 +28,30 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public boolean createCompany(Company company) {
-        try {
-            companyRepository.save(company);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public Company addCompany(Company company) {
+        return companyRepository.save(company);
     }
 
     @Override
-    public boolean updateCompany(Long id, Company updatedCompany) {
+    public Company updateCompany(Long id, Company company) {
         Optional<Company> optionalCompany = companyRepository.findById(id);
         if (optionalCompany.isPresent()) {
-            Company company = optionalCompany.get();
-            company.setName(updatedCompany.getName());
-            company.setDescription(updatedCompany.getDescription());
+            Company existing = optionalCompany.get();
+            existing.setName(company.getName());
+            existing.setAddress(company.getAddress());
+            existing.setIndustry(company.getIndustry());
+            existing.setDescription(company.getDescription());
+            return companyRepository.save(existing);
+        }
+        return null;
+    }
 
-            companyRepository.save(company);
+    @Override
+    public boolean deleteCompany(Long id) {
+        if (companyRepository.existsById(id)) {
+            companyRepository.deleteById(id);
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean deleteCompanyById(Long id) {
-        try {
-            companyRepository.deleteById(id);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

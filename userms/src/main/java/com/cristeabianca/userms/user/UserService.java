@@ -1,12 +1,9 @@
 package com.cristeabianca.userms.user;
 
-import com.cristeabianca.job_application.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-
-
     Page<User> getAllUsers(Pageable pageable);
     User getUserById(Long id);
     boolean createUser(User user);

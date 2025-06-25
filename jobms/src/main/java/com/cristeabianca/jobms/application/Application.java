@@ -1,11 +1,6 @@
 package com.cristeabianca.jobms.application;
 
-import com.cristeabianca.job_application.interview.Interview;
-import com.cristeabianca.job_application.job.Job;
-import com.cristeabianca.job_application.user.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,41 +14,32 @@ public class Application {
     private String status;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
+    @Column(name = "job_id", nullable = false)
+    private Long jobId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "job_id")
-    private Job job;
-
-    @OneToOne(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private Interview interview;
-
+    @Column(name = "interview_id")
+    private Long interviewId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public Application() {
+        this.createdAt = LocalDateTime.now();
     }
 
-    public Application(Long id, String status, User user, Job job, Interview interview) {
+    public Application(Long id, String status, Long userId, Long jobId, Long interviewId) {
         this.id = id;
         this.status = status;
-        this.user = user;
-        this.job = job;
-        this.interview = interview;
+        this.userId = userId;
+        this.jobId = jobId;
+        this.interviewId = interviewId;
+        this.createdAt = LocalDateTime.now();
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 
     public Long getId() {
         return id;
@@ -71,27 +57,35 @@ public class Application {
         this.status = status;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public Job getJob() {
-        return job;
+    public Long getJobId() {
+        return jobId;
     }
 
-    public void setJob(Job job) {
-        this.job = job;
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
     }
 
-    public Interview getInterview() {
-        return interview;
+    public Long getInterviewId() {
+        return interviewId;
     }
 
-    public void setInterview(Interview interview) {
-        this.interview = interview;
+    public void setInterviewId(Long interviewId) {
+        this.interviewId = interviewId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
