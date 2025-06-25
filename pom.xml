@@ -10,7 +10,8 @@
 	</parent>
 	<groupId>com.cristeabianca</groupId>
 	<artifactId>job-application</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 	<name>job-application</name>
 	<description>Spring Boot project - Job Application</description>
 	<url/>
@@ -101,5 +102,10 @@
 			</plugin>
 		</plugins>
 	</build>
+	<modules>
+		<module>jobms</module>
+		<module>reviewms</module>
+		<module>companyms</module>
+	</modules>
 
 </project>

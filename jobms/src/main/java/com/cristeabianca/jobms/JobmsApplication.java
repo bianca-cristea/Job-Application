@@ -1,13 +1,13 @@
-package com.cristeabianca.job_application;
+package com.cristeabianca.jobms;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class JobApplication {
+public class JobmsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(JobApplication.class, args);
+		SpringApplication.run(JobmsApplication.class, args);
 	}
 
 }
