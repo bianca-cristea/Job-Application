@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.cristeabianca</groupId>
-	<artifactId>companyms</artifactId>
+	<artifactId>userms</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>companyms</name>
-	<description>Microservice for CompanyApplication</description>
+	<name>userms</name>
+	<description>Microservice for User Application</description>
 	<url/>
 	<licenses>
 		<license/>
