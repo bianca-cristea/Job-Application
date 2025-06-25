@@ -66,8 +66,20 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     public List<Interview> getInterviewsByUsername(String username) {
-        return interviewRepository.findByApplicationUserUsername(username);
+          List<ApplicationDTO> applications = applicationClient.getApplicationsByUsername(username);
+
+        if (applications.isEmpty()) {
+            return List.of();
+        }
+
+         List<Long> applicationIds = applications.stream()
+                .map(ApplicationDTO::getId)
+                .collect(Collectors.toList());
+
+          return interviewRepository.findByApplicationIdIn(applicationIds);
     }
+
+
 
     @Override
     public boolean createInterview(Long applicationId, Interview interview) {

@@ -1,9 +1,10 @@
 package com.cristeabianca.userms.jwt;
 
-import com.cristeabianca.job_application.role.Role;
-import com.cristeabianca.job_application.role.RoleRepository;
-import com.cristeabianca.job_application.user.User;
-import com.cristeabianca.job_application.user.UserRepository;
+
+import com.cristeabianca.userms.role.Role;
+import com.cristeabianca.userms.role.RoleRepository;
+import com.cristeabianca.userms.user.User;
+import com.cristeabianca.userms.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,8 +73,8 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody com.cristeabianca.job_application.jwt.LoginRequest request) {
-        try {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request){
+     try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 

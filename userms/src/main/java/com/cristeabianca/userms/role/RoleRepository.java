@@ -1,6 +1,5 @@
 package com.cristeabianca.userms.role;
 
-import com.cristeabianca.job_application.role.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -38,7 +38,7 @@ public class ReviewController {
     public ResponseEntity<String> addReview(@PathVariable Long companyId,
                                             @RequestBody Review review,
                                             @RequestParam String username) {
-        boolean created = reviewService.addReview(review, companyId, username);
+        boolean created = reviewService.addReview(review);
         if (created) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Review created successfully");
         }

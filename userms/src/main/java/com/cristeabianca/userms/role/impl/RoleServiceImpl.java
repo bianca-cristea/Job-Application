@@ -1,8 +1,10 @@
 package com.cristeabianca.userms.role.impl;
 
-import com.cristeabianca.job_application.role.Role;
-import com.cristeabianca.job_application.role.RoleRepository;
-import com.cristeabianca.job_application.role.RoleService;
+import com.cristeabianca.userms.role.Role;
+
+import com.cristeabianca.userms.role.RoleRepository;
+import com.cristeabianca.userms.role.RoleService;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
