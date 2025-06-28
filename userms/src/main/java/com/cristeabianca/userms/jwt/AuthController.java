@@ -1,10 +1,9 @@
-package com.cristeabianca.userms.jwt;
+package jwt;
 
+import role.Role;
+import user.User;
+import user.UserRepository;
 
-import com.cristeabianca.userms.role.Role;
-import com.cristeabianca.userms.role.RoleRepository;
-import com.cristeabianca.userms.user.User;
-import com.cristeabianca.userms.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import role.RoleRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,7 +52,6 @@ public class AuthController {
         Set<Role> roles = new HashSet<>();
 
         if (request.getRoles() == null || request.getRoles().isEmpty()) {
-
             Role userRole = roleRepository.findByName("USER")
                     .orElseThrow(() -> new RuntimeException("Default role not found"));
             roles.add(userRole);
@@ -71,10 +70,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body("User created");
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request){
-     try {
+        try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
@@ -92,6 +90,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
+
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

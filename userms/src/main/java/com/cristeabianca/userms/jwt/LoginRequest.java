@@ -1,4 +1,4 @@
-package com.cristeabianca.userms.jwt;
+package jwt;
 
 public class LoginRequest {
     private String username;

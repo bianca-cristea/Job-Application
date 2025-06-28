@@ -1,5 +1,7 @@
-package com.cristeabianca.userms.jwt;
+package jwt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -77,13 +79,10 @@ public class JwtUtils {
         }catch (ExpiredJwtException e) {
             logger.error("JWT token is expired", e);
         }
-
-    } catch (UnsupportedJwtException e) {
+        catch (UnsupportedJwtException e) {
             logger.error("JWT token is unsupported: {}", e.getMessage());
-
-
         } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty: " + e.getMessage());
+            logger.error("JWT claims string is empty: {}" + e.getMessage());
         }
 
         return false;

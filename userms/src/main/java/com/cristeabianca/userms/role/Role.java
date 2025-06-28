@@ -1,7 +1,7 @@
-package com.cristeabianca.userms.role;
+package role;
 
 import jakarta.persistence.*;
-import com.cristeabianca.userms.user.User;
+import user.User;
 
 import java.util.HashSet;
 import java.util.Set;

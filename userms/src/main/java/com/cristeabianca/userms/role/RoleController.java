@@ -1,4 +1,4 @@
-package com.cristeabianca.userms.role;
+package role;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.cristeabianca.userms.jwt;
+package jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

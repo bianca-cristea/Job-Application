@@ -1,10 +1,10 @@
-package com.cristeabianca.userms.user;
+package user;
 
-import com.cristeabianca.userms.role.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import role.Role;
 
 import java.util.HashSet;
 import java.util.Set;

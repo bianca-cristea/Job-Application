@@ -1,4 +1,4 @@
-package com.cristeabianca.userms.jwt;
+package jwt;
 
 public class JwtResponse {
     private String token;

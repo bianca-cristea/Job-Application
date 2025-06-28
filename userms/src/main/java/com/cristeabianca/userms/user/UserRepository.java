@@ -1,6 +1,5 @@
-package com.cristeabianca.userms.user;
+package user;
 
-import com.cristeabianca.userms.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

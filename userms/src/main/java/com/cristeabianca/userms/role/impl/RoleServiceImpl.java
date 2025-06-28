@@ -1,10 +1,8 @@
-package com.cristeabianca.userms.role.impl;
+package role.impl;
 
-import com.cristeabianca.userms.role.Role;
-
-import com.cristeabianca.userms.role.RoleRepository;
-import com.cristeabianca.userms.role.RoleService;
-
+import role.Role;
+import role.RoleRepository;
+import role.RoleService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,22 +35,26 @@ public class RoleServiceImpl implements RoleService {
             return false;
         }
     }
+
+    @Override
+    public boolean updateRole(Long id, Role role) {
+        return false;
+    }
+
     @Override
     public boolean updateRole(Long id) {
-
-        if(roleRepository.existsById(id)){
-            roleRepository.deleteById(id);
-            return true;}
+        if (roleRepository.existsById(id)) {
+             return true;
+        }
         return false;
-
     }
+
     @Override
     public boolean deleteRole(Long id) {
-
-            if(roleRepository.existsById(id)){
+        if (roleRepository.existsById(id)) {
             roleRepository.deleteById(id);
-            return true;}
-            return false;
-
+            return true;
+        }
+        return false;
     }
 }

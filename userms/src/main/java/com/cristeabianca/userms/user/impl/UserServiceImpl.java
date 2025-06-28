@@ -1,8 +1,7 @@
-package com.cristeabianca.userms.user.impl;
+package user.impl;
 
-import com.cristeabianca.userms.user.User;
-import com.cristeabianca.userms.user.UserRepository;
-import com.cristeabianca.userms.user.UserService;
+import user.User;
+import user.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import user.UserService;
 
 import javax.sql.DataSource;
 import java.util.Optional;
